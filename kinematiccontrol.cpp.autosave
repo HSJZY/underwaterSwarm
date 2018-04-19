@@ -1,0 +1,13 @@
+#include "kinematiccontrol.h"
+
+kinematicControl::kinematicControl()
+{
+
+}
+
+kinematicControl::MoveForward(float angle, float ratio_speed)
+{
+    robotStatus curRobotStatue;
+    float curAngle=curRobotStatue.getCurAngleOfMPU();
+    
+}

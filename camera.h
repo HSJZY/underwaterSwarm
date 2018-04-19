@@ -6,9 +6,9 @@ class camera
 {
 public:
     camera();
-    void OpenCrame();
+    void OpenCamera();
     void CapturePicture(int n);
-    void CloseCrame();
+    void CloseCamera();
 };
 
 #endif // CAMERA_H

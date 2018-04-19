@@ -1,0 +1,14 @@
+#ifndef KINEMATICCONTROL_H
+#define KINEMATICCONTROL_H
+#include "robotStatus.h"
+#include "motor.h"
+
+class kinematicControl
+{
+public:
+    kinematicControl();
+    void MoveForward(float angle,float ratio_speed);
+    void TurnAround(float angle);
+};
+
+#endif // KINEMATICCONTROL_H
