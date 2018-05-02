@@ -26,7 +26,8 @@ SOURCES += main.cpp \
     mpu/MPU6050.cpp \
     mpu/I2Cdev.cpp \
     mpu/demo_dmp.cpp \
-    robotStatus.cpp
+    robotStatus.cpp \
+    formation_control.cpp
 
 HEADERS += \
     camera.h \
@@ -41,12 +42,14 @@ HEADERS += \
     mpu/I2Cdev.h \
     mpu/demo_dmp.h \
     mpu/helper_3dmath.h \
-    robotStatus.h
+    robotStatus.h \
+    formation_control.h
 
 unix:!macx: LIBS += -lwiringPi
 
 
-unix:!macx: LIBS += -L$$PWD/../../../../usr/local/lib/ -lopencv_core  -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc
+unix:!macx: LIBS += -L$$PWD/../../../../usr/local/lib/ -lopencv_core  -lopencv_imgcodecs -lopencv_highgui -lopencv_imgproc -lopencv_video -lopencv_videoio -lopencv_flann -lopencv_calib3d
 
 INCLUDEPATH += $$PWD/../../../../usr/local/include
 DEPENDPATH += $$PWD/../../../../usr/local/include
+

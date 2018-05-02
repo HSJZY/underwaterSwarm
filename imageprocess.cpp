@@ -78,6 +78,7 @@ vector<vector<Point2f>> imageProcess::separateBeacon(vector<RotatedRect> minRect
 
     for(int i=0;i<area_rect.size();i++)
     {
+        if (area_rect[i]<300) continue;//去除噪声
         map<float,int>::iterator iter=area2index.find(area_rect[i]);
         int index=iter->second;
 //        float cur_area=area_rect[i];
@@ -119,7 +120,7 @@ vector<vector<Point2f>> imageProcess::separateBeacon(vector<RotatedRect> minRect
     return unique_rect;
 }
 
-void imageProcess::cacBoundRectRandomDirection(Mat eroDst, Mat frame0)
+vector<vector<Point2f>> imageProcess::cacBoundRectRandomDirection(Mat eroDst, Mat frame0)
 {
     vector<vector<Point>> contour;
     findContours(eroDst, contour, RETR_CCOMP , CHAIN_APPROX_SIMPLE); //在二值图像中寻找轮廓
@@ -145,7 +146,11 @@ void imageProcess::cacBoundRectRandomDirection(Mat eroDst, Mat frame0)
             line(frame0,rect_points[j],rect_points[(j+1)%4],color,1,8);
         }
     }
- //  Mat resultMat=Mat::zeros(eroDst.size(),CV_8UC3);
+    cv::namedWindow("resultMat2",(400,600));
+    imshow("resultMat2",frame0);//在原图显示矩形框
+    waitKey(0);
+    return unique_rect;
+//   Mat resultMat=Mat::zeros(eroDst.size(),CV_8UC3);
 //    for(int i=0;i<minRect.size();i++)
 //    {
 //        Scalar color=CV_RGB(rand()&255,rand()&255,rand()&255);
@@ -160,9 +165,7 @@ void imageProcess::cacBoundRectRandomDirection(Mat eroDst, Mat frame0)
 //        }
 //    }
    // imshow("resultMat1",resultMat);
-    cv::namedWindow("resultMat2",(400,600));
-    imshow("resultMat2",frame0);//在原图显示矩形框
-    waitKey(0);
+
 }
 
 void imageProcess::getBinImage(Mat src1, Mat src2, Mat dst, int nThre)
@@ -186,12 +189,13 @@ void imageProcess::getBinImage(Mat src1, Mat src2, Mat dst, int nThre)
     }
 }
 
-int imageProcess::test_image(Mat frame0)
+vector<vector<float>>  imageProcess::getDistanceFromImage(Mat frame0)
 {
+    vector<vector<float>> dist2agents;
     if(!frame0.data)
     {
         cout<<"unable to open"<<endl;
-        return -1;
+        return dist2agents;
     }
     Size imgSize=frame0.size();
     Mat rawImg = Mat(imgSize, CV_8UC3);
@@ -212,6 +216,120 @@ int imageProcess::test_image(Mat frame0)
     erode(dilDst, eroDst, Mat(), Point(-1,-1), 1);  //图像腐蚀，先膨胀在腐蚀属于闭运算
     cv::namedWindow("dil_eroDst",(400,600));
     imshow("dil_eroDst",eroDst);
-    cacBoundRectRandomDirection(eroDst,frame0);
-    return 0;
+    vector<vector<Point2f>> v_bound_rects=cacBoundRectRandomDirection(eroDst,frame0);
+    dist2agents=solveBeaconDistance(v_bound_rects, 40);
+    return dist2agents;
+}
+
+vector<vector<float>> imageProcess::solveBeaconDistance(vector<vector<Point2f> > unique_rect, float edge_length)
+{
+    vector<vector<float>> res;
+    cout<<"testing..."<<endl;
+    for(int i=0;i<unique_rect.size();i++)
+    {
+
+        vector<Point2f> cur_rect=unique_rect[i];
+        Point2f verticle_1=cur_rect[0];
+        map<float,int> map_distance_point;
+        vector<float> distance_verticle1_others;
+        //將距离压入向量中用于排序，并获取距离和点的映射关系
+        distance_verticle1_others.push_back(calc_distance(verticle_1,cur_rect[1]));
+        pair<int,float> cur_dist_2_index(1,calc_distance(verticle_1,cur_rect[1]));
+        map_distance_point.insert(cur_dist_2_index);
+
+        distance_verticle1_others.push_back(calc_distance(verticle_1,cur_rect[2]));
+        cur_dist_2_index=make_pair(2,calc_distance(verticle_1,cur_rect[2]));
+        map_distance_point.insert(cur_dist_2_index);
+
+        distance_verticle1_others.push_back(calc_distance(verticle_1,cur_rect[3]));
+        cur_dist_2_index=make_pair(3,calc_distance(verticle_1,cur_rect[3]));
+        map_distance_point.insert(cur_dist_2_index);
+
+        //排序，取得两条短边
+        sort(distance_verticle1_others.begin(),distance_verticle1_others.end());
+        //获取真实距离和像素的比率，用于后续3D左边点的获取
+        float long_edge_pix=distance_verticle1_others[1];
+        float ratio_len2pixel=edge_length/long_edge_pix;
+
+        //获取到的中点坐标,也就是世界坐标系的坐标原点
+        Point2f middle((cur_rect[0].x+cur_rect[2].x)/2.0,(cur_rect[0].y+cur_rect[2].y)/2.0);
+        cout<<"middle.x:"<<middle.x<<"middle.y:"<<middle.y<<endl;
+        //真实场景下的3D坐标点
+        vector<Point3f> objP;
+
+        for(int i=0;i<4;i++)
+        {
+            float z;
+            if(map_distance_point[i]>long_edge_pix)
+            {
+                z=1*sqrt(abs(2*pow(long_edge_pix,2)-pow(map_distance_point[i],2)))*ratio_len2pixel;
+            }
+            else{
+                z=1*sqrt(abs(pow(long_edge_pix,2)-pow(map_distance_point[i],2)))*ratio_len2pixel;
+            }
+            Point3f point((cur_rect[i].x-middle.x)*ratio_len2pixel,ratio_len2pixel*(cur_rect[i].y-middle.y),0);
+            objP.push_back(point);
+            cout<<"Point  x:"<<point.x<<"y:"<<point.y<<endl;
+        }
+
+        //相机参数
+        vector<Point2f> imgP=cur_rect;
+        double camD[9]={189.62 , 0,739.0365,0,271.3572,737.8754,0,0,1};
+        double distCoeffD[5]={0.0454,-0.394,0.4363,-0.0053,0.00078};
+        Mat camera_matrix=Mat(3,3,CV_64FC1,camD);
+        Mat distortion_coefficients=Mat(5,1,CV_64FC1,distCoeffD);
+
+        Mat r_matrix;
+        Mat t_matrix;
+        double buff[2];
+        vector<float> output_series;
+        cout<<"camera_matrix"<<endl;
+        cout<<"distortion:"<<endl;
+        cout<<"camera_matrix:"<<camera_matrix<<endl<<distortion_coefficients<<endl<<"Mat(imageP):"<<Mat(imgP)<<"Mat(pos)"<<endl;
+        cout<<"Mat(objP):"<<Mat(objP);
+        solvePnP(Mat(objP),Mat(imgP),camera_matrix,distortion_coefficients,r_matrix,t_matrix);
+        cout<<"r_matrix"<<r_matrix<<endl;
+        cout<<"t_matrix:"<<t_matrix<<endl;
+
+        //旋转向量变旋转矩阵
+        //提取旋转矩阵
+        double rm[9];
+        cv::Mat rotM(3, 3, CV_64FC1, rm);
+        cv::Rodrigues(r_matrix, rotM);
+        cout<<"rotM:"<<rotM<<endl;
+        double r11 = rotM.ptr<double>(0)[0];
+        double r12 = rotM.ptr<double>(0)[1];
+        double r13 = rotM.ptr<double>(0)[2];
+        double r21 = rotM.ptr<double>(1)[0];
+        double r22 = rotM.ptr<double>(1)[1];
+        double r23 = rotM.ptr<double>(1)[2];
+        double r31 = rotM.ptr<double>(2)[0];
+        double r32 = rotM.ptr<double>(2)[1];
+        double r33 = rotM.ptr<double>(2)[2];
+
+        /*************************************此处计算出相机的旋转角**********************************************/
+        //计算出相机坐标系的三轴旋转欧拉角，旋转后可以转出世界坐标系。
+        //旋转顺序为z、y、x
+        //原理见帖子：
+        double thetaz = atan2(r21, r11) / CV_PI * 180;
+        double thetay = atan2(-1 * r31, sqrt(r32*r32 + r33*r33)) / CV_PI * 180;
+        double thetax = atan2(r32, r33) / CV_PI * 180;
+
+        //fout << -1 * thetax << endl << -1 * thetay << endl << -1 * thetaz << endl;
+        cout << "相机的三轴旋转角：" << -1 * thetax << ", " << -1 * thetay << ", " << -1 * thetaz << endl;
+        //fout.close();
+        /*************************************此处计算出相机的旋转角END**********************************************/
+
+        for(int i=0;i<3;i++)
+        {
+            buff[1]=t_matrix.at<double>(0,i);
+            t_matrix.at<double>(0,i)=buff[1];
+            cout<<"t_i"<<i<<":"<<buff[1]<<endl;
+            output_series.push_back(t_matrix.at<double>(0,i));
+        }
+        cout<<"output_series:"<<output_series[0]<<" "<<output_series[1]<<output_series[2];
+
+        res.push_back(output_series);
+    }
+    return res;
 }
