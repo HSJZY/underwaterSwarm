@@ -12,6 +12,9 @@
 #include"ledlattice.h"
 #include"imageprocess.h"
 #include"camera.h"
+
+#include "mainwindow.h"
+#include <QApplication>
 using namespace std;
 using namespace cv;
 
@@ -89,16 +92,23 @@ void drive_motor_11(int motor_id,float speed,motor_c motor_1)
 
 void test_camera(int ID,int num_pictures)
 {
-    camera camera1(0);
-    for(int i=0;i<num_pictures;i++)
+    camera camera1(ID);
+//    camera1.CloseCamera();
+    camera1.OpenCamera();
+    for(int i=0;;i++)
     {
-        camera1.OpenCamera();
+//
+
         Mat frame=camera1.CapturePicture();
+//        break;
+//        if(!frame)break;
+
         imshow("frame:",frame);
         string str_img="//home//pi//Desktop/underwaterSwarm//img_cal//image"+std::to_string(i)+".jpg";
         imwrite(str_img,frame);
-        cv::waitKey(0);
+        cv::waitKey(30);
     }
+    camera1.CloseCamera();
 }
 
 int main(int argc, char *argv[])
@@ -106,30 +116,33 @@ int main(int argc, char *argv[])
     wiringPiSetup();
 //    motor_c motor1;
 //    initMPU6050();
+//    test_camera(0,300);
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
 
-    ledLattice dianz;
-    dianz.show();
+    return a.exec();
 
-    //camera camtest(0);
-    //camtest.OpenCamera();
-//    test_camera(0,20);
 
-    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/test_5.jpg"); //读入图片
-    imageProcess img_process;
-    vector<vector<float> > res= img_process.getDistanceFromImage(frame0);
+//    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/test_5.jpg"); //读入图片
+//    imageProcess img_process;
+//    vector<vector<float> > res= img_process.getDistanceFromImage(frame0);
 //    Point2f
 //    [215.712, 157.464]
 //    [144.451, 88.5008]
 //    [211.979, 18.7217]
 //    [283.241, 87.6846]
-//    kinematicControl kineTest;
+    kinematicControl kineTest;
 //    kineTest.MoveLateral(0,right_side,0.4,1);
 //      kineTest.SelfRotate(-60);
-//    kineTest.motor_setup();
-//    while(1)
-//    {
-//        kineTest.MoveForward(0,0.4,30000);
-//    }
+    kineTest.motor_setup();
+    while(1)
+    {
+        kineTest.MoveForward(0,0.1,10000);
+        kineTest.switchMode();
+        kineTest.MoveForward(120,0.4,10000);
+        kineTest.switchMode();
+    }
 
     /*motor_c motor1,motor2,motor3,motor4;
     motor1.motor_setup();
