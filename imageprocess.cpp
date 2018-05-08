@@ -274,8 +274,13 @@ vector<vector<float>> imageProcess::solveBeaconDistance(vector<vector<Point2f> >
 
         //相机参数
         vector<Point2f> imgP=cur_rect;
+        //陆地上相机参数
         double camD[9]={189.62 , 0,739.0365,0,271.3572,737.8754,0,0,1};
         double distCoeffD[5]={0.0454,-0.394,0.4363,-0.0053,0.00078};
+        //水里标定的参数
+        //double camD[9]={301.4028 , 0,1003.75,0,227.5788,1000.65,0,0,1};
+        //double distCoeffD[5]={0.4368,-0.2404,-0.0161,0.0175,-10.2254};
+
         Mat camera_matrix=Mat(3,3,CV_64FC1,camD);
         Mat distortion_coefficients=Mat(5,1,CV_64FC1,distCoeffD);
 

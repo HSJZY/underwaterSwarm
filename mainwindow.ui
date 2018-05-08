@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>742</width>
-    <height>502</height>
+    <height>552</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,10 +20,10 @@
    <widget class="QGroupBox" name="RobotController">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>20</y>
-      <width>291</width>
-      <height>291</height>
+      <width>331</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="title">
@@ -32,8 +32,8 @@
     <widget class="QPushButton" name="forward_move">
      <property name="geometry">
       <rect>
-       <x>111</x>
-       <y>72</y>
+       <x>131</x>
+       <y>162</y>
        <width>80</width>
        <height>31</height>
       </rect>
@@ -45,8 +45,8 @@
     <widget class="QPushButton" name="left_move">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>110</y>
+       <x>40</x>
+       <y>200</y>
        <width>85</width>
        <height>31</height>
       </rect>
@@ -58,10 +58,10 @@
     <widget class="QPushButton" name="right_move">
      <property name="geometry">
       <rect>
-       <x>203</x>
-       <y>111</y>
+       <x>223</x>
+       <y>201</y>
        <width>85</width>
-       <height>27</height>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
@@ -71,8 +71,8 @@
     <widget class="QPushButton" name="backward_move">
      <property name="geometry">
       <rect>
-       <x>110</x>
-       <y>150</y>
+       <x>130</x>
+       <y>240</y>
        <width>80</width>
        <height>31</height>
       </rect>
@@ -84,8 +84,8 @@
     <widget class="QPushButton" name="reset_parameter">
      <property name="geometry">
       <rect>
-       <x>200</x>
-       <y>210</y>
+       <x>240</x>
+       <y>280</y>
        <width>80</width>
        <height>22</height>
       </rect>
@@ -106,10 +106,10 @@
     <widget class="QPushButton" name="stop_engine">
      <property name="geometry">
       <rect>
-       <x>110</x>
-       <y>111</y>
+       <x>240</x>
+       <y>310</y>
        <width>80</width>
-       <height>31</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="styleSheet">
@@ -119,12 +119,12 @@
       <string>stop</string>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>190</y>
-       <width>131</width>
+       <x>60</x>
+       <y>280</y>
+       <width>161</width>
        <height>24</height>
       </rect>
      </property>
@@ -132,7 +132,7 @@
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>速度(0~1)：</string>
+         <string>velocity(0~1)：</string>
         </property>
        </widget>
       </item>
@@ -158,12 +158,12 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>11</x>
-       <y>221</y>
-       <width>171</width>
+       <x>1</x>
+       <y>311</y>
+       <width>221</width>
        <height>24</height>
       </rect>
      </property>
@@ -171,9 +171,22 @@
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>方位(-180～180)：</string>
+         <string>target yaw(-180～180)：</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item>
        <spacer name="horizontalSpacer_2">
@@ -197,6 +210,115 @@
       </item>
      </layout>
     </widget>
+    <widget class="QPushButton" name="self_rotate">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>201</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>rotate</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>20</y>
+       <width>241</width>
+       <height>131</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>images/robot_small.jpg</pixmap>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_11">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>360</y>
+       <width>171</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PID parameter setting:</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="reset_pid">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>430</y>
+       <width>81</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>reset pid</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>390</y>
+       <width>281</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_9">
+      <item>
+       <widget class="QLabel" name="label_12">
+        <property name="text">
+         <string>Kp:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="k_p">
+        <property name="text">
+         <string>1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_13">
+        <property name="text">
+         <string>Ki:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="k_i">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_14">
+        <property name="text">
+         <string>Kd:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="k_d">
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
@@ -204,7 +326,7 @@
       <x>360</x>
       <y>20</y>
       <width>391</width>
-      <height>351</height>
+      <height>341</height>
      </rect>
     </property>
     <property name="title">
@@ -290,6 +412,216 @@
        <widget class="QPushButton" name="screen_shot">
         <property name="text">
          <string>screen shot</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QRadioButton" name="radio_show_pnp">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>320</y>
+       <width>151</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>show PnP result</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>370</y>
+      <width>391</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Robot Status</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>161</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>current yaw：</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="cur_yaw">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>20</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>motor velocity:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_10">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>101</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>MPU6050:</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>100</y>
+       <width>121</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_5">
+      <item>
+       <widget class="QLabel" name="label_9">
+        <property name="text">
+         <string>motor4:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="motor4_velocity">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>80</y>
+       <width>121</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>motor3:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="motor3_velocity">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>60</y>
+       <width>121</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>motor2:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="motor2_velocity">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>40</y>
+       <width>121</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <item>
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>motor1:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="motor1_velocity">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>0</string>
         </property>
        </widget>
       </item>

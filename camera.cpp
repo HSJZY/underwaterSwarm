@@ -7,7 +7,14 @@ camera::camera(int ID)
 
 void camera::OpenCamera()
 {
-//    VideoCapture vedeo(0);
+//    VideoCapture vedeo;
+//    vedeo.open(0);
+//    Mat img;
+//    vedeo>>img;
+//    imshow("img:",img);
+//    waitKey(0);
+//    return;
+//    this->m_Capture.release();
     this->m_Capture.open(this->m_ID);
     this->m_Capture.set(cv::CAP_PROP_FRAME_WIDTH,640);
     this->m_Capture.set(cv::CAP_PROP_FRAME_HEIGHT,480);
@@ -33,4 +40,11 @@ Mat camera::CapturePicture()
     this->m_Capture.grab();
     this->m_Capture.retrieve(frame);
     return frame;
+}
+
+void camera::CloseCamera()
+{
+    this->m_Capture.release();
+    //cvReleaseCapture(this->m_Capture);
+//    this->m_Capture.release();
 }

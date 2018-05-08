@@ -15,5 +15,22 @@
 //运动方向定义
 #define left_side 0
 #define right_side 1
+#define forward_side 2
+#define backward_side 3
+#define rotate_side 4
+
+//定义四个摄像头的位置
+#define num_cameras 4
+#define camera_pos1 0
+#define camera_pos2 90
+#define camera_pos3 180
+#define camera_pos4 -90
+
+//定义pid的三个参数
+//static float k_p=1;
+//static float k_i;
+//static float k_d;
+
+
 
 #endif // GLOBAL_SETTING_H

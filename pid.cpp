@@ -1,11 +1,11 @@
-#include "base.h"
+#include "pid.h"
 
 const float  lowpass_filter = 7.9577e-3;
 
-/*PID²ÎÊý³õÊ¼»¯*/
+/*PIDå‚æ•°åˆå§‹åŒ–*/
 void pidInit(struct Robot_PID* pid, float kp,float ki, float kd)
 {
-  pid->merror = 0;     //²âÁ¿Îó²î
+  pid->merror = 0;     //æµ‹é‡è¯¯å·®
   pid->last_error = 0;
   pid->Integrator = 0;
   pid->deriv = 0;
@@ -14,23 +14,23 @@ void pidInit(struct Robot_PID* pid, float kp,float ki, float kd)
   pid->Kp = kp;
   pid->Ki = ki;
   pid->Kd = kd;
-  pid->Lowpass_EN = PID_FALSE;                  //µÍÍ¨ÂË²¨	½ûÖ¹  PID_FALSE=0x00
-  pid->iLimit = DEFAULT_PID_INTEGRATION_LIMIT;	//»ý·Ö¼«ÏÞ  100
+  pid->Lowpass_EN = PID_FALSE;                  //ä½Žé€šæ»¤æ³¢	ç¦æ­¢  PID_FALSE=0x00
+  pid->iLimit = DEFAULT_PID_INTEGRATION_LIMIT;	//ç§¯åˆ†æžé™  100
 }
 
-//¸ù¾Ý²âÁ¿ÖµÓëÆÚÍûÖµ²îÖµ¸üÐÂPIDÊä³ö
+//æ ¹æ®æµ‹é‡å€¼ä¸ŽæœŸæœ›å€¼å·®å€¼æ›´æ–°PIDè¾“å‡º
 float pidUpdate(struct Robot_PID* pid, float measured,float dt)
 {
-	float output;
-	
-	pid->current = measured;
-	pid->merror = pid->target - measured;
-	
-	//I  »ý·Ö
+        float output;
+
+        pid->current = measured;
+        pid->merror = pid->target - measured;
+
+        //I  ç§¯åˆ†
   if(pid->Ki != 0)
   {
-   pid->Integrator += (pid->Ki * pid->merror) * dt;//¾ØÐÎËã·¨  Õâ¶ù¿ÉÒÔÓÅ»¯ÎªÌÝÐÎËã·¨
-   if (pid->Integrator > pid->iLimit)             //´óÓÚ»ý·Ö¼«ÏÞÊ± »ý·ÖÎªiLimit   ÕâÀïÎªÁËÌá¸ßÏìÓ¦¿ÉÒÔÔö¼Ó²ÎÊýindex
+   pid->Integrator += (pid->Ki * pid->merror) * dt;//çŸ©å½¢ç®—æ³•  è¿™å„¿å¯ä»¥ä¼˜åŒ–ä¸ºæ¢¯å½¢ç®—æ³•
+   if (pid->Integrator > pid->iLimit)             //å¤§äºŽç§¯åˆ†æžé™æ—¶ ç§¯åˆ†ä¸ºiLimit   è¿™é‡Œä¸ºäº†æé«˜å“åº”å¯ä»¥å¢žåŠ å‚æ•°index
    {
     pid->Integrator = pid->iLimit;
    }
@@ -39,11 +39,11 @@ float pidUpdate(struct Robot_PID* pid, float measured,float dt)
     pid->Integrator = -pid->iLimit;
    }
   }
-	 //D Î¢·Ö
+         //D å¾®åˆ†
   pid->deriv = (pid->merror - pid->last_error) / dt;
-  if(pid->Lowpass_EN != PID_FALSE)	//µÍÍ¨ÂË²¨¡£½ØÖ¹ÆµÂÊ20hz
-  { 
-		pid->deriv = pid->last_deriv + (dt / (lowpass_filter + dt)) * (pid->deriv - pid->last_deriv);	
+  if(pid->Lowpass_EN != PID_FALSE)	//ä½Žé€šæ»¤æ³¢ã€‚æˆªæ­¢é¢‘çŽ‡20hz
+  {
+                pid->deriv = pid->last_deriv + (dt / (lowpass_filter + dt)) * (pid->deriv - pid->last_deriv);
   }
 
   pid->outP = pid->Kp * pid->merror;
@@ -53,16 +53,16 @@ float pidUpdate(struct Robot_PID* pid, float measured,float dt)
   pid->PID_out = output =pid->outP +pid->outI +pid->outD;
 
   pid->last_error = pid->merror;
-	
-	 return output;
+
+         return output;
 }
 
-//¸ù¾ÝÎó²î¸üÐÂPIDÊä³ö
+//æ ¹æ®è¯¯å·®æ›´æ–°PIDè¾“å‡º
 float pidUpdate_err(struct Robot_PID* pid,float err, float dt)
 {
   float output;
   pid->merror = err;
-  //I »ý·Ö 
+  //I ç§¯åˆ†
   pid->Integrator += (pid->Ki * pid->merror) * dt;
   if (pid->Integrator > pid->iLimit)
   {
@@ -72,11 +72,11 @@ float pidUpdate_err(struct Robot_PID* pid,float err, float dt)
   {
     pid->Integrator = -pid->iLimit;
   }
-  //D  Î¢·Ö
+  //D  å¾®åˆ†
   pid->deriv = (pid->merror - pid->last_error) / dt;
-  if(pid->Lowpass_EN != PID_FALSE) //µÍÍ¨ÂË²¨¡£½ØÖ¹ÆµÂÊ20hz
-	{
-		pid->deriv = pid->last_deriv + (dt / (lowpass_filter + dt)) * (pid->deriv - pid->last_deriv);	
+  if(pid->Lowpass_EN != PID_FALSE) //ä½Žé€šæ»¤æ³¢ã€‚æˆªæ­¢é¢‘çŽ‡20hz
+        {
+                pid->deriv = pid->last_deriv + (dt / (lowpass_filter + dt)) * (pid->deriv - pid->last_deriv);
   }
 
   pid->outP = pid->Kp * pid->merror;
@@ -84,7 +84,7 @@ float pidUpdate_err(struct Robot_PID* pid,float err, float dt)
   pid->outD = pid->Kd * pid->deriv;
 
   pid->PID_out =  output = 	pid->outP +pid->outI +pid->outD;
-  
+
   pid->last_error = pid->merror;
   return output;
 }
@@ -142,6 +142,6 @@ void pidSetMeasured(struct Robot_PID* pid, float measured)
 
 void pidSetLowPassEnable(struct Robot_PID* pid)
 {
-	pid->Lowpass_EN = PID_TRUE;	
+        pid->Lowpass_EN = PID_TRUE;
 }
 

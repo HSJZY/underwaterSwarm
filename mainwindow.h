@@ -9,6 +9,7 @@
 #include<thread>
 #include"kinematiccontrol.h"
 #include"global_setting.h"
+#include"camera.h"
 
 namespace Ui {
 class MainWindow;
@@ -23,10 +24,11 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
+//    void on_pushButton_clicked();
 
     void on_open_camera_clicked();
     void videoUpdate();
+    void robotStatusUpdate();
 
     void on_reset_parameter_clicked();
 
@@ -44,12 +46,22 @@ private slots:
 
     void on_backward_move_clicked();
 
+    void on_self_rotate_clicked();
+
+    void on_ratio_speed_textChanged(const QString &arg1);
+
+    void on_reset_pid_clicked();
+
+    void on_close_camera_clicked();
+
 private:
     Ui::MainWindow *ui;
     cv::VideoCapture capture;
     QTimer *camera_timer;
     cv::Mat camera_frame;
     QImage camera_image;
+
+    vector<camera> vec_cameras;
 
     float ratio_speed_setted;
     float ratio_angle_setted;

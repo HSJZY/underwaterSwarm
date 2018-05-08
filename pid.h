@@ -4,32 +4,33 @@
 
 #define PID_TRUE  0xff
 #define PID_FALSE 0x00
-#define DEFAULT_PID_INTEGRATION_LIMIT  100.0
+
+#define DEFAULT_PID_INTEGRATION_LIMIT  0.3
 struct Robot_PID
 {
-	float target;  // Ä¿±êÖµ
-	float current; // µ±Ç°Öµ
-	float merror;   //²âÁ¿Îó²î
-	float last_error;  //×îºóÎó²î
-	float Integrator;	//µ±Ç°»ı·ÖÖµ
-	float deriv;       //Î¢·ÖÖµ
-	float last_deriv;
-	float iLimit;
-	float Kp;	   //±ÈÀı 
-	float Ki;	   //»ı·Ö
-	float Kd;	   //Î¢·Ö
+    float target;  // ç›®æ ‡å€¼
+    float current; // å½“å‰å€¼
+    float merror;   //æµ‹é‡è¯¯å·®
+    float last_error;  //æœ€åè¯¯å·®
+    float Integrator;	//å½“å‰ç§¯åˆ†å€¼
+    float deriv;       //å¾®åˆ†å€¼
+    float last_deriv;
+    float iLimit;
+    float Kp;	   //æ¯”ä¾‹
+    float Ki;	   //ç§¯åˆ†
+    float Kd;	   //å¾®åˆ†
 
-	unsigned char Lowpass_EN;
-	float outP;         //< proportional output (debugging)±ÈÀıÊä³ö
-  float outI;         //< integral output (debugging)»ı·ÖÊä³ö
-  float outD;         //< derivative output (debugging)Î¢·ÖÊä³ö
-	float PID_out;   //µ±Ç°PID µÄÊä³ö
+    unsigned char Lowpass_EN;
+    float outP;         //< proportional output (debugging)æ¯”ä¾‹è¾“å‡º
+  float outI;         //< integral output (debugging)ç§¯åˆ†è¾“å‡º
+  float outD;         //< derivative output (debugging)å¾®åˆ†è¾“å‡º
+    float PID_out;   //å½“å‰PID çš„è¾“å‡º
 };
 
-void pidInit(struct Robot_PID* pid, const float kp, const float ki, const float kd);    //³õÊ¼»¯PID²ÎÊı
-float pidUpdate(struct Robot_PID* pid, float measured,float dt);     //¸üĞÂº¯Êı
+void pidInit(struct Robot_PID* pid,  float kp,  float ki,  float kd);    //åˆå§‹åŒ–PIDå‚æ•°
+float pidUpdate(struct Robot_PID* pid, float measured,float dt);     //æ›´æ–°å‡½æ•°
 
-float pidUpdate_err(struct Robot_PID* pid,float err, float dt);                    
+float pidUpdate_err(struct Robot_PID* pid,float err, float dt);
 void pidSetIntegralLimit(struct Robot_PID* pid, float limit);
 void pidSetError(struct Robot_PID* pid, float err);
 void pidReset(struct Robot_PID* pid);
@@ -41,4 +42,6 @@ void pidSetMeasured(struct Robot_PID* pid, float measured);
 void pidSetTarget_Measure(struct Robot_PID* pid, float target, float measured);
 void pidSetLowPassEnable(struct Robot_PID* pid);
 
+
 #endif
+

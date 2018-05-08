@@ -1,5 +1,10 @@
 #include "kinematiccontrol.h"
 
+float robotStatus::motor1_speed;
+float robotStatus::motor2_speed;
+float robotStatus::motor3_speed;
+float robotStatus::motor4_speed;
+
 kinematicControl::kinematicControl()
 {
 
@@ -25,6 +30,16 @@ void kinematicControl::drive_motor_thread_fun(int motor_id,float speed,motor_c m
             break;
         }
 }
+void kinematicControl::motor_setup()
+{
+    motor_c motor_left;
+    motor_left.motor_setup();
+}
+void kinematicControl::switchMode()
+{
+    delay(1000);
+    this->motor_setup();
+}
 
 void kinematicControl::MoveForward(float target_angle, float ratio_speed,float duration_ms)
 {
@@ -34,20 +49,31 @@ void kinematicControl::MoveForward(float target_angle, float ratio_speed,float d
     gettimeofday(&timerBreakStart,NULL);
     long int startTime=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
 
+    long int lastTime=startTime;
     motor_c motor_left,motor_right;
-    motor_left.motor_setup();
+
+    Robot_PID robot_pid;
+    pidInit(&robot_pid,curRobotStatue.k_p,curRobotStatue.k_i,curRobotStatue.k_d);
+    float diff_speed=0;
+    float last_diff_speed=0;
+
+    //以下用于读取机器人此刻的速度
+    float last_left_speed=0;
+    float last_right_speed=0;
     while(1){
         float cur_angle=curRobotStatue.getCurAngleOfMPU();
 
-
-
         int motor_pin_left,motor_pin_right;
         float left_speed,right_speed,angle_diff;
+        //确定需要往前或后走的电机
         if(target_angle>=-90 &&target_angle<=90)
         {
             motor_pin_left=motor3_pin;
             motor_pin_right=motor1_pin;
             angle_diff=target_angle-cur_angle;
+
+            curRobotStatue.motor1_speed=last_right_speed;
+            curRobotStatue.motor3_speed=last_left_speed;
         }
         else
         {
@@ -57,35 +83,59 @@ void kinematicControl::MoveForward(float target_angle, float ratio_speed,float d
             if (target_angle<0){target_angle+=360;}
             float cur_angle_tranfer=cur_angle+180;
             angle_diff=target_angle-cur_angle_tranfer;
-        }
-        float kp=0.2;
-        left_speed=ratio_speed-angle_diff/90.0*kp;
-        right_speed=ratio_speed+angle_diff/90.0*kp;
 
+            curRobotStatue.motor2_speed=last_left_speed;
+            curRobotStatue.motor4_speed=last_right_speed;
+        }
+        angle_diff/=90.0;
+
+        //当时间超过设定的时间，跳出循环，结束这部分的程序
+        gettimeofday(&timerBreakEnd,NULL);
+        long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
+        if(endTime-startTime>duration_ms)break;
+        //
+        float dt=0.1;
+        if((endTime-lastTime)>dt*1000)
+        {
+            diff_speed=pidUpdate_err(&robot_pid,angle_diff,(endTime-lastTime)/1000.0);
+            lastTime=endTime;
+            last_diff_speed=diff_speed;
+        }
+
+        left_speed=ratio_speed-last_diff_speed;
+        right_speed=ratio_speed+last_diff_speed;
+
+        left_speed=std::max(std::min(left_speed,float(1)),float(0));
+        right_speed=std::max(std::min(right_speed,float(1)),float(0));
+
+        last_left_speed=left_speed;
+        last_right_speed=right_speed;
+
+        cout<<"kp:"<<curRobotStatue.k_p<<"ki:"<<curRobotStatue.k_i<<"kd:"<<curRobotStatue.k_d<<endl;
         cout<<"current yaw...:"<<cur_angle<<"left_speed:"<<left_speed<<"right speed:"<<right_speed<<endl;
         thread left_motor_thread(this->drive_motor_thread_fun,motor_pin_left,left_speed,motor_left);
         thread right_motor_thread(this->drive_motor_thread_fun,motor_pin_right,right_speed,motor_right);
 
         left_motor_thread.join();
         right_motor_thread.join();
-
-        gettimeofday(&timerBreakEnd,NULL);
-        long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
-        if(endTime-startTime>duration_ms)break;
     }
+
 }
 
 void kinematicControl::SelfRotate(float target_angle)
 {
     robotStatus curRobotStatue;
     motor_c motor_1,motor_2;
-    motor_1.motor_setup();
+//    motor_1.motor_setup();
     float ratio_speed=0.6;
     while(1)
     {
 
         int motor_pin_1=motor1_pin;
         int motor_pin_2=motor4_pin;
+        curRobotStatue.motor1_speed=ratio_speed;
+        curRobotStatue.motor4_speed=ratio_speed;
+
         thread first_motor_thread(this->drive_motor_thread_fun,motor_pin_1,ratio_speed,motor_1);
         thread second_motor_thread(this->drive_motor_thread_fun,motor_pin_2,ratio_speed,motor_2);
         first_motor_thread.join();
@@ -98,38 +148,94 @@ void kinematicControl::SelfRotate(float target_angle)
         if(abs(target_angle-cur_angle)<2)
             break;
     }
+    curRobotStatue.motor1_speed=0;
+    curRobotStatue.motor2_speed=0;
+    curRobotStatue.motor3_speed=0;
+    curRobotStatue.motor4_speed=0;
 }
 
 void kinematicControl::MoveLateral(float target_angle,int side, float ratio_speed, float duration_ms)
 {
-//    float target_angle;
+    //这一段用于实现在角度过大情况下的最优运动选择
+    if(target_angle>90|| target_angle<-90)
+    {
+        int trans_side=1-side;
+        float trans_ang;
+        if(target_angle>90){
+            trans_ang=180-target_angle;
+        }
+        else{
+            trans_ang=180+target_angle;
+        }
+        this->MoveLateral(trans_ang,trans_side,ratio_speed,duration_ms);
+        return;
+    }
     float angle_diff,left_speed,right_speed;
     robotStatus cur_robot_statue;
     motor_c left_motor,right_motor;
-    left_motor.motor_setup();
+//    left_motor.motor_setup();
     int motor_pin_left,motor_pin_right;
+
+    struct timeval timerBreakStart,timerBreakEnd;
+    gettimeofday(&timerBreakStart,NULL);
+    long int startTime=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
+
+    //用于pid调速
+    Robot_PID robot_pid;
+    pidInit(&robot_pid,cur_robot_statue.k_p,cur_robot_statue.k_i,cur_robot_statue.k_d);
+    float diff_speed=0;
+    float last_diff_speed=0;
+    long int lastTime=startTime;
+    //以下用于读取机器人此刻的速度
+    float last_left_speed=0;
+    float last_right_speed=0;
     while(1){
         float cur_angle=cur_robot_statue.getCurAngleOfMPU();
         if (side==right_side){
             angle_diff=target_angle-cur_angle;
             motor_pin_left=motor1_pin;
             motor_pin_right=motor2_pin;
+            cur_robot_statue.motor1_speed=last_left_speed;
+            cur_robot_statue.motor2_speed=last_right_speed;
         }
         else if(side==left_side){
             angle_diff=target_angle-cur_angle;
             motor_pin_left=motor4_pin;
             motor_pin_right=motor3_pin;
+            cur_robot_statue.motor3_speed=last_right_speed;
+            cur_robot_statue.motor4_speed=last_left_speed;
+        }
+        //当时间超过设定的时间，跳出循环，结束这部分的程序
+        gettimeofday(&timerBreakEnd,NULL);
+        long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
+        if(endTime-startTime>duration_ms)break;
+        //
+        float dt=0.1;
+        if((endTime-lastTime)>dt*1000)
+        {
+            diff_speed=pidUpdate_err(&robot_pid,angle_diff,(endTime-lastTime)/1000.0);
+            lastTime=endTime;
+            last_diff_speed=diff_speed;
         }
 
-        float kp=0.2;
-        left_speed=ratio_speed-angle_diff/90.0*kp;
-        right_speed=ratio_speed+angle_diff/90.0*kp;
+        left_speed=ratio_speed-last_diff_speed;
+        right_speed=ratio_speed+last_diff_speed;
 
-        cout<<"current yaw...:"<<cur_angle<<"left_speed:"<<left_speed<<"right speed:"<<right_speed<<endl;
+        left_speed=std::max(std::min(left_speed,float(1)),float(0));
+        right_speed=std::max(std::min(right_speed,float(1)),float(0));
+
+        last_left_speed=left_speed;
+        last_right_speed=right_speed;
+
+        cout<<"current yaw...:"<<cur_angle<<"target_angle:"<<target_angle<<"left_speed:"<<left_speed<<"right speed:"<<right_speed<<endl;
         thread left_motor_thread(this->drive_motor_thread_fun,motor_pin_left,left_speed,left_motor);
         thread right_motor_thread(this->drive_motor_thread_fun,motor_pin_right,right_speed,right_motor);
 
         left_motor_thread.join();
         right_motor_thread.join();
     }
+    cur_robot_statue.motor1_speed=0;
+    cur_robot_statue.motor2_speed=0;
+    cur_robot_statue.motor3_speed=0;
+    cur_robot_statue.motor4_speed=0;
 }
