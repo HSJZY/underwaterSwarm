@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 using namespace cv;
 using namespace std;
+struct Robot_PID kinematicControl::first_pid;
 //float robotStatus::k_p;
 //float robotStatus::k_i;
 //float robotStatus::k_d;
@@ -15,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->advanced_angle->setText("0");
     ui->close_camera->setEnabled(false);
     ui->screen_shot->setEnabled(false);
+    ui->cbx_formation_type->addItem("Line_Formation");
 
     QImage *img=new QImage;
     img->load("//home//pi//Desktop//uitest//images//robot_small.jpg");
@@ -23,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
     this->ratio_angle_setted=0;
     this->ratio_speed_setted=0;
     this->is_stop=false;
+    this->is_able_shot=false;
+    this->cur_shot_nums=0;
+
     on_reset_pid_clicked();
 
     QTimer *status_timer=new QTimer(this);
@@ -45,10 +50,10 @@ QImage cvMat2QImage(Mat& mat)
     return *qimg;
 }
 
-//void MainWindow::on_pushButton_clicked()
-//{
+void MainWindow::on_pushButton_clicked()
+{
 
-//}
+}
 
 void MainWindow::on_open_camera_clicked()
 {
@@ -69,12 +74,13 @@ void MainWindow::on_open_camera_clicked()
 //读取摄像头并显示在窗口
 void MainWindow::videoUpdate()
 {
-    vector<Mat> camera_frames;
+//    vector<Mat> camera_frames;
+    this->camera_frames.clear();
+    this->is_able_shot=false;
     for(int i=0;i<num_cameras;i++)
     {
         Mat camera_frame=vec_cameras[i].CapturePicture();
-        camera_frames.push_back(camera_frame);
-
+        this->camera_frames.push_back(camera_frame);
         if(!camera_frame.empty())
         {
             camera_image=cvMat2QImage(camera_frame);
@@ -95,17 +101,11 @@ void MainWindow::videoUpdate()
             default:
                 break;
             }
-//            ui->camera1->setPixmap(QPixmap::fromImage(camera_result));
         }
     }
-
-//    capture>>camera_frame;
-//    if(!camera_frame.empty())
-//    {
-//        camera_image=cvMat2QImage(camera_frame);
-//        QImage camera_result=camera_image.scaled(ui->camera1->width(),ui->camera1->height(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation).rgbSwapped();
-//        ui->camera1->setPixmap(QPixmap::fromImage(camera_result));
-//    }
+    robotStatus cur_robot_status;
+    cur_robot_status.set_cur_frames(camera_frames);
+    this->is_able_shot=true;
 }
 //更新机器人当前状态的数据
 void MainWindow::robotStatusUpdate()
@@ -157,13 +157,14 @@ void MainWindow::move_tread(int move_type)
 {
     kinematicControl kine_move;
     kine_move.switchMode();
+    struct Robot_PID last_pid=kine_move.get_first_pid();
 //    kine_move.motor_setup();
     while(1)
     {
         float angle_transfer=this->ratio_angle_setted;
         switch (move_type) {
         case forward_side:
-            kine_move.MoveForward(this->ratio_angle_setted,this->ratio_speed_setted,1000);
+            last_pid=kine_move.MoveForward(this->ratio_angle_setted,this->ratio_speed_setted,1000,last_pid);
             break;
         case backward_side:
             if(angle_transfer<0)
@@ -174,16 +175,17 @@ void MainWindow::move_tread(int move_type)
             {
                 angle_transfer-=180;
             }
-            kine_move.MoveForward(angle_transfer,this->ratio_speed_setted,1000);
+            last_pid=kine_move.MoveForward(angle_transfer,this->ratio_speed_setted,1000,last_pid);
             break;
         case left_side:
-            kine_move.MoveLateral(this->ratio_angle_setted,left_side,this->ratio_speed_setted,1000);
+            last_pid=kine_move.MoveLateral(this->ratio_angle_setted,left_side,this->ratio_speed_setted,1000,last_pid);
             break;
         case right_side:
-            kine_move.MoveLateral(this->ratio_angle_setted,right_side,this->ratio_speed_setted,1000);
+            last_pid=kine_move.MoveLateral(this->ratio_angle_setted,right_side,this->ratio_speed_setted,1000,last_pid);
             break;
         case rotate_side:
             kine_move.SelfRotate(this->ratio_angle_setted);
+            this->is_stop=true;
             break;
         default:
             break;
@@ -320,6 +322,34 @@ void MainWindow::on_close_camera_clicked()
             break;
         }
     }
+    vec_cameras.clear();
     ui->open_camera->setEnabled(true);
     ui->close_camera->setEnabled(false);
+    ui->screen_shot->setEnabled(false);
+    camera_timer->stop();
+    cout<<"cmaeras are closed"<<endl;
+}
+
+void MainWindow::on_screen_shot_clicked()
+{
+    while(1)
+    {
+        if(this->is_able_shot==false) continue;
+        for(int i=0;i<this->camera_frames.size();i++)
+        {
+            string str_img="//home//pi//Desktop//uitest//images//camera"+std::to_string(i+1)+"//img"+std::to_string(cur_shot_nums)+".jpg";
+            imwrite(str_img,camera_frames[i]);
+        }
+        break;
+    }
+    this->cur_shot_nums+=1;
+}
+
+void MainWindow::on_btn_start_formation_clicked()
+{
+    if(ui->cbx_formation_type->currentText()=="Line_Formation")
+    {
+        formation_control line_formation_control;
+        line_formation_control.line_formation_control(this->ratio_angle_setted,1000);
+    }
 }

@@ -12,6 +12,7 @@
 #include"ledlattice.h"
 #include"imageprocess.h"
 #include"camera.h"
+#include"test_program.h"
 
 #include "mainwindow.h"
 #include <QApplication>
@@ -114,19 +115,22 @@ void test_camera(int ID,int num_pictures)
 int main(int argc, char *argv[])
 {
     wiringPiSetup();
+    test_formation_alg();
+
 //    motor_c motor1;
-//    initMPU6050();
+    initMPU6050();
 //    test_camera(0,300);
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
-
     return a.exec();
 
 
-//    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/test_5.jpg"); //读入图片
-//    imageProcess img_process;
-//    vector<vector<float> > res= img_process.getDistanceFromImage(frame0);
+    Mat frame0=imread("/home/pi/Desktop/uitest/images/img67.jpg"); //读入图片
+    imageProcess img_process;
+    Mat res_frame;
+    vector<vector<float> > res= img_process.getDistanceFromImage(frame0,res_frame);
 //    Point2f
 //    [215.712, 157.464]
 //    [144.451, 88.5008]
@@ -138,10 +142,10 @@ int main(int argc, char *argv[])
     kineTest.motor_setup();
     while(1)
     {
-        kineTest.MoveForward(0,0.1,10000);
+        kineTest.MoveForward(0,0.1,100000);
         kineTest.switchMode();
-        kineTest.MoveForward(120,0.4,10000);
-        kineTest.switchMode();
+//        kineTest.MoveForward(120,0.4,10000);
+//        kineTest.switchMode();
     }
 
     /*motor_c motor1,motor2,motor3,motor4;

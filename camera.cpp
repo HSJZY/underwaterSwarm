@@ -45,6 +45,8 @@ Mat camera::CapturePicture()
 void camera::CloseCamera()
 {
     this->m_Capture.release();
+//    this->m_Capture.
+    this->m_Capture.~VideoCapture();
     //cvReleaseCapture(this->m_Capture);
 //    this->m_Capture.release();
 }

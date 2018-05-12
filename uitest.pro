@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     mpu/demo_dmp.cpp \
     mpu/I2Cdev.cpp \
     mpu/MPU6050.cpp \
-    pid.cpp
+    pid.cpp \
+    test_program.cpp
 
 HEADERS  += mainwindow.h \
     camera.h \
@@ -42,7 +43,8 @@ HEADERS  += mainwindow.h \
     mpu/I2Cdev.h \
     mpu/MPU6050.h \
     mpu/MPU6050_6Axis_MotionApps20.h \
-    pid.h
+    pid.h \
+    test_program.h
 
 FORMS    += mainwindow.ui
 INCLUDEPATH += /usr/local/include\

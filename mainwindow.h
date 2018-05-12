@@ -10,6 +10,7 @@
 #include"kinematiccontrol.h"
 #include"global_setting.h"
 #include"camera.h"
+#include"formation_control.h"
 
 namespace Ui {
 class MainWindow;
@@ -54,12 +55,19 @@ private slots:
 
     void on_close_camera_clicked();
 
+    void on_screen_shot_clicked();
+
+    void on_pushButton_clicked();
+
+    void on_btn_start_formation_clicked();
+
 private:
     Ui::MainWindow *ui;
     cv::VideoCapture capture;
     QTimer *camera_timer;
     cv::Mat camera_frame;
     QImage camera_image;
+    vector<Mat> camera_frames;
 
     vector<camera> vec_cameras;
 
@@ -67,6 +75,8 @@ private:
     float ratio_angle_setted;
 
     bool is_stop;
+    bool is_able_shot;
+    int cur_shot_nums;
 };
 
 #endif // MAINWINDOW_H

@@ -2,6 +2,11 @@
 #define ROBOTSTATUS_H
 
 #include"mpu/demo_dmp.h"
+#include<vector>
+#include<opencv2/opencv.hpp>
+
+using namespace std;
+using namespace cv;
 
 class robotStatus
 {
@@ -15,6 +20,9 @@ public:
     void setKp(float setted_kp);
     void setKi(float setted_ki);
     void setKd(float setted_kd);
+
+    void set_cur_frames(vector<Mat> vec_frames);
+    vector<Mat> get_cur_frames();
 
 public:
     static float motor1_speed;
@@ -30,6 +38,8 @@ private:
     static float m_initAngleOfMPU;
     static float m_curAngleOfMPU;
     static float m_absAngleOfMPU;
+
+    static vector<Mat> vec_cur_frames;
 };
 
 #endif // ROBOTSTATUS_H

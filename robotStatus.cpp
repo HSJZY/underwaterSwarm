@@ -8,6 +8,8 @@ float robotStatus::k_p;
 float robotStatus::k_i;
 float robotStatus::k_d;
 
+vector<Mat> robotStatus::vec_cur_frames;
+
 robotStatus::robotStatus()
 {
 }
@@ -56,4 +58,14 @@ void robotStatus::setAbsAngleOfMPU(float angle)
 float robotStatus::getCurAngleOfMPU()
 {
     return this->m_curAngleOfMPU;
+}
+//获取当前摄像头拍取的图片
+vector<Mat> robotStatus::get_cur_frames()
+{
+    return this->vec_cur_frames;
+}
+//设定当前摄像头拍取的图片
+void robotStatus::set_cur_frames(vector<Mat> vec_frames)
+{
+    this->vec_cur_frames=vec_frames;
 }

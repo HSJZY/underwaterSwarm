@@ -7,8 +7,15 @@ float robotStatus::motor4_speed;
 
 kinematicControl::kinematicControl()
 {
-
+    robotStatus curRobotStatue;
+    pidInit(&this->first_pid,curRobotStatue.k_p,curRobotStatue.k_i,curRobotStatue.k_d);
 }
+
+void kinematicControl::set_first_pid(float k_p, float k_i, float k_d)
+{
+    pidInit(&this->first_pid,k_p,k_i,k_d);
+}
+
 void kinematicControl::drive_motor_thread_fun(int motor_id,float speed,motor_c motor)
 {
         switch (motor_id) {
@@ -37,11 +44,16 @@ void kinematicControl::motor_setup()
 }
 void kinematicControl::switchMode()
 {
-    delay(1000);
+    delay(1500);
     this->motor_setup();
 }
 
-void kinematicControl::MoveForward(float target_angle, float ratio_speed,float duration_ms)
+struct Robot_PID kinematicControl::get_first_pid()
+{
+    return this->first_pid;
+}
+
+struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_speed,float duration_ms,Robot_PID last_pid)
 {
     robotStatus curRobotStatue;
 
@@ -52,8 +64,10 @@ void kinematicControl::MoveForward(float target_angle, float ratio_speed,float d
     long int lastTime=startTime;
     motor_c motor_left,motor_right;
 
+
     Robot_PID robot_pid;
-    pidInit(&robot_pid,curRobotStatue.k_p,curRobotStatue.k_i,curRobotStatue.k_d);
+    robot_pid=last_pid;
+
     float diff_speed=0;
     float last_diff_speed=0;
 
@@ -105,8 +119,8 @@ void kinematicControl::MoveForward(float target_angle, float ratio_speed,float d
         left_speed=ratio_speed-last_diff_speed;
         right_speed=ratio_speed+last_diff_speed;
 
-        left_speed=std::max(std::min(left_speed,float(1)),float(0));
-        right_speed=std::max(std::min(right_speed,float(1)),float(0));
+        left_speed=std::max(std::min(left_speed,float(1)),float(0.01));
+        right_speed=std::max(std::min(right_speed,float(1)),float(0.01));
 
         last_left_speed=left_speed;
         last_right_speed=right_speed;
@@ -119,7 +133,7 @@ void kinematicControl::MoveForward(float target_angle, float ratio_speed,float d
         left_motor_thread.join();
         right_motor_thread.join();
     }
-
+    return robot_pid;
 }
 
 void kinematicControl::SelfRotate(float target_angle)
@@ -154,7 +168,7 @@ void kinematicControl::SelfRotate(float target_angle)
     curRobotStatue.motor4_speed=0;
 }
 
-void kinematicControl::MoveLateral(float target_angle,int side, float ratio_speed, float duration_ms)
+struct Robot_PID kinematicControl::MoveLateral(float target_angle,int side, float ratio_speed, float duration_ms,struct Robot_PID last_pid)
 {
     //这一段用于实现在角度过大情况下的最优运动选择
     if(target_angle>90|| target_angle<-90)
@@ -168,7 +182,7 @@ void kinematicControl::MoveLateral(float target_angle,int side, float ratio_spee
             trans_ang=180+target_angle;
         }
         this->MoveLateral(trans_ang,trans_side,ratio_speed,duration_ms);
-        return;
+        return last_pid;
     }
     float angle_diff,left_speed,right_speed;
     robotStatus cur_robot_statue;
@@ -181,8 +195,8 @@ void kinematicControl::MoveLateral(float target_angle,int side, float ratio_spee
     long int startTime=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
 
     //用于pid调速
-    Robot_PID robot_pid;
-    pidInit(&robot_pid,cur_robot_statue.k_p,cur_robot_statue.k_i,cur_robot_statue.k_d);
+    Robot_PID robot_pid=last_pid;
+//    pidInit(&robot_pid,cur_robot_statue.k_p,cur_robot_statue.k_i,cur_robot_statue.k_d);
     float diff_speed=0;
     float last_diff_speed=0;
     long int lastTime=startTime;
@@ -205,11 +219,13 @@ void kinematicControl::MoveLateral(float target_angle,int side, float ratio_spee
             cur_robot_statue.motor3_speed=last_right_speed;
             cur_robot_statue.motor4_speed=last_left_speed;
         }
+        angle_diff/=90.0;
+
         //当时间超过设定的时间，跳出循环，结束这部分的程序
         gettimeofday(&timerBreakEnd,NULL);
         long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
         if(endTime-startTime>duration_ms)break;
-        //
+        //每隔100ms，进行一次pid速度的跟新
         float dt=0.1;
         if((endTime-lastTime)>dt*1000)
         {
@@ -221,13 +237,13 @@ void kinematicControl::MoveLateral(float target_angle,int side, float ratio_spee
         left_speed=ratio_speed-last_diff_speed;
         right_speed=ratio_speed+last_diff_speed;
 
-        left_speed=std::max(std::min(left_speed,float(1)),float(0));
-        right_speed=std::max(std::min(right_speed,float(1)),float(0));
+        left_speed=std::max(std::min(left_speed,float(1)),float(0.01));
+        right_speed=std::max(std::min(right_speed,float(1)),float(0.01));
 
         last_left_speed=left_speed;
         last_right_speed=right_speed;
 
-        cout<<"current yaw...:"<<cur_angle<<"target_angle:"<<target_angle<<"left_speed:"<<left_speed<<"right speed:"<<right_speed<<endl;
+        cout<<"current yaw...:"<<cur_angle<<" target_angle: "<<target_angle<<" left_speed:"<<left_speed<<"right speed:"<<right_speed<<"angle diff: "<<angle_diff<<"last diff speed"<<last_diff_speed<<endl;
         thread left_motor_thread(this->drive_motor_thread_fun,motor_pin_left,left_speed,left_motor);
         thread right_motor_thread(this->drive_motor_thread_fun,motor_pin_right,right_speed,right_motor);
 
@@ -238,4 +254,6 @@ void kinematicControl::MoveLateral(float target_angle,int side, float ratio_spee
     cur_robot_statue.motor2_speed=0;
     cur_robot_statue.motor3_speed=0;
     cur_robot_statue.motor4_speed=0;
+
+    return robot_pid;
 }

@@ -7,10 +7,62 @@ formation_control::formation_control()
 
 void formation_control::line_formation_control(float direction_angle, float inter_distance)
 {
-    vector<vector<float>> total_dis_ang;
-    total_dis_ang=calc_displacement(grab_pictures());
-    vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
-    start_move_line(agents_both_sides,direction_angle,inter_distance);
+    while(1)
+    {
+        vector<vector<float>> total_dis_ang;
+        total_dis_ang=calc_displacement(grab_pictures());
+        vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
+        start_move_line(agents_both_sides,direction_angle,inter_distance);
+    }
+}
+
+void formation_control::line_formation_control_for_test(float direction_angle, float inter_distance, vector<vector<float> > total_info)
+{
+    while(1)
+    {
+        vector<vector<float>> total_dis_ang;
+        total_dis_ang=calc_displacement_test(total_info);
+        vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
+        start_move_line(agents_both_sides,direction_angle,inter_distance);
+    }
+}
+//计算当前机器人左右两端其他机器人相对于自身的位置信息
+vector<vector<float>> formation_control::calc_displacement_test(vector<vector<float>> frames)
+{
+    vector<vector<float>> lattic_dis_ang;
+
+    vector<vector<float>> img_displacement;
+
+
+    img_displacement=frames;
+    for(int j=0;j<img_displacement.size();j++)
+    {
+        vector<float> cur_dis_ang;
+        //计算图片中点阵板相对于机器人运动的距离和角度位置
+        float camera_pos;
+        switch (j) {
+        case 0:
+            camera_pos=camera_pos1;
+            break;
+        case 1:
+            camera_pos=camera_pos2;
+        case 2:
+            camera_pos=camera_pos3;
+            break;
+        case 3:
+            camera_pos=camera_pos4;
+        default:
+            break;
+        }
+
+        float angle_lattic=-atan2(img_displacement[j][0],img_displacement[j][2])+camera_pos/180.0*PI;
+        float distance_lattic=sqrt(pow(img_displacement[j][0],2)+pow(img_displacement[j][2],2))+radius_robot*1.8;//这里的1.8倍只是大概估计的值
+        cur_dis_ang.push_back(distance_lattic);
+        cur_dis_ang.push_back(angle_lattic);
+        lattic_dis_ang.push_back(cur_dis_ang);
+    }
+
+    return lattic_dis_ang;
 }
 
 
@@ -30,14 +82,31 @@ vector<vector<float>> formation_control::calc_displacement(vector<Mat> frames)
     {
         vector<vector<float>> img_displacement;
         Mat calc_frame=frames[i];
+        Mat res_frame;
         if(!calc_frame.empty())
         {
-            img_displacement=img_process.getDistanceFromImage(calc_frame);
+            img_displacement=img_process.getDistanceFromImage(calc_frame,res_frame);
             for(int j=0;j<img_displacement.size();j++)
             {
                 vector<float> cur_dis_ang;
                 //计算图片中点阵板相对于机器人运动的距离和角度位置
-                float angle_lattic=-atan2(img_displacement[j][0],img_displacement[j][2])+camera_pos1/180*PI;
+                float camera_pos;
+                switch (i) {
+                case 0:
+                    camera_pos=camera_pos1;
+                    break;
+                case 1:
+                    camera_pos=camera_pos2;
+                case 2:
+                    camera_pos=camera_pos3;
+                    break;
+                case 3:
+                    camera_pos=camera_pos4;
+                default:
+                    break;
+                }
+
+                float angle_lattic=-atan2(img_displacement[j][0],img_displacement[j][2])+camera_pos/180.0*PI;
                 float distance_lattic=sqrt(pow(img_displacement[j][0],2)+pow(img_displacement[j][2],2))+radius_robot*1.8;//这里的1.8倍只是大概估计的值
                 cur_dis_ang.push_back(distance_lattic);
                 cur_dis_ang.push_back(angle_lattic);
@@ -143,8 +212,8 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     {
         //此时机器人两侧都有邻近机器人
 
-        middle_x=nearest_left[0]*sin(nearest_left[1])-nearest_right[0]*sin(nearest_right[1]);
-        middle_y=nearest_left[0]*cos(nearest_left[1])+nearest_right[0]*cos(nearest_right[1]);
+        middle_x=(nearest_left[0]*sin(nearest_left[1])+nearest_right[0]*sin(nearest_right[1]))/2;
+        middle_y=(nearest_left[0]*cos(nearest_left[1])+nearest_right[0]*cos(nearest_right[1]))/2;
         if(middle_x<0)
         {
             //小于0说明当前机器人在中点的左边，需要向右边移动
@@ -162,8 +231,46 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     move_y=abs(middle_y);
 
     //插补的方式进行运动，先横向，后纵向
-    float kp=1;
-    float ratio_speed=0.5;
-    kine_control.MoveLateral(direction_angle,move_lateral_side,ratio_speed,3000);
-    kine_control.MoveForward(direction_angle,ratio_speed,3000);
+    float kp=3;
+    float ratio_speed=0.4;
+    float move_lateral_time=3000*move_x/10000*kp;
+    float move_forward_time=3000*move_y/10000*kp;
+
+    bool is_moved=false;
+    //此处设定一个阈值为20mm，20mm之内不进行移动
+    if(move_x>20)
+    {
+            kine_control.MoveLateral(direction_angle,move_lateral_side,ratio_speed,move_lateral_time);
+            kine_control.switchMode();
+            is_moved==true;
+    }
+    if(move_y<20)
+    {
+        if(is_moved==false)
+        {
+            delay(2000);
+            kine_control.switchMode();
+        }
+        return;
+    }
+    else
+    {
+        if(middle_x>0)
+        {
+            kine_control.MoveForward(direction_angle,ratio_speed,move_forward_time);
+            kine_control.switchMode();
+        }
+        else
+        {
+            float move_angle=direction_angle+180;
+            if(move_angle>180)
+            {
+                move_angle-=360;
+            }
+
+            kine_control.MoveForward(move_angle,ratio_speed,move_forward_time);
+            kine_control.switchMode();
+        }
+    }
 }
+

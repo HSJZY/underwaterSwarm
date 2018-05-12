@@ -21,16 +21,12 @@
 
 //定义四个摄像头的位置
 #define num_cameras 4
-#define camera_pos1 0
-#define camera_pos2 90
-#define camera_pos3 180
-#define camera_pos4 -90
+#define camera_pos1 30
+#define camera_pos2 0
+#define camera_pos3 0
+#define camera_pos4 0
 
-//定义pid的三个参数
-//static float k_p=1;
-//static float k_i;
-//static float k_d;
-
-
+//定义球形机器人外壳尺寸
+#define radius_robot 80
 
 #endif // GLOBAL_SETTING_H

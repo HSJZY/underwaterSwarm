@@ -27,12 +27,13 @@ void imageProcess::brightAdjust(Mat src, Mat dst, double dContrast, double dBrig
         }
     }
 }
-
+//用于计算两点之间的距离
 float imageProcess::calc_distance(Point2f verticle1,Point2f verticle2)
 {
     float distance=sqrt(pow(verticle1.x-verticle2.x,2)+pow(verticle1.y-verticle2.y,2));
     return distance;
 }
+//通过三个点来计算矩形面积
 float imageProcess::calc_area(Point2f verticle1, Point2f verticle2, Point2f verticle3)
 {
     float dis_a=this->calc_distance(verticle1,verticle2);
@@ -120,7 +121,7 @@ vector<vector<Point2f>> imageProcess::separateBeacon(vector<RotatedRect> minRect
     return unique_rect;
 }
 
-vector<vector<Point2f>> imageProcess::cacBoundRectRandomDirection(Mat eroDst, Mat frame0)
+vector<vector<Point2f>> imageProcess::cacBoundRectRandomDirection(Mat eroDst, Mat frame0,Mat &res_frame)
 {
     vector<vector<Point>> contour;
     findContours(eroDst, contour, RETR_CCOMP , CHAIN_APPROX_SIMPLE); //在二值图像中寻找轮廓
@@ -146,6 +147,7 @@ vector<vector<Point2f>> imageProcess::cacBoundRectRandomDirection(Mat eroDst, Ma
             line(frame0,rect_points[j],rect_points[(j+1)%4],color,1,8);
         }
     }
+    res_frame=frame0;
     cv::namedWindow("resultMat2",(400,600));
     imshow("resultMat2",frame0);//在原图显示矩形框
     waitKey(0);
@@ -189,7 +191,7 @@ void imageProcess::getBinImage(Mat src1, Mat src2, Mat dst, int nThre)
     }
 }
 
-vector<vector<float>>  imageProcess::getDistanceFromImage(Mat frame0)
+vector<vector<float>>  imageProcess::getDistanceFromImage(Mat frame0,Mat &res_frame0)
 {
     vector<vector<float>> dist2agents;
     if(!frame0.data)
@@ -216,7 +218,7 @@ vector<vector<float>>  imageProcess::getDistanceFromImage(Mat frame0)
     erode(dilDst, eroDst, Mat(), Point(-1,-1), 1);  //图像腐蚀，先膨胀在腐蚀属于闭运算
     cv::namedWindow("dil_eroDst",(400,600));
     imshow("dil_eroDst",eroDst);
-    vector<vector<Point2f>> v_bound_rects=cacBoundRectRandomDirection(eroDst,frame0);
+    vector<vector<Point2f>> v_bound_rects=cacBoundRectRandomDirection(eroDst,frame0,res_frame0);
     dist2agents=solveBeaconDistance(v_bound_rects, 40);
     return dist2agents;
 }
@@ -275,10 +277,15 @@ vector<vector<float>> imageProcess::solveBeaconDistance(vector<vector<Point2f> >
         //相机参数
         vector<Point2f> imgP=cur_rect;
         //陆地上相机参数
-        double camD[9]={189.62 , 0,739.0365,0,271.3572,737.8754,0,0,1};
-        double distCoeffD[5]={0.0454,-0.394,0.4363,-0.0053,0.00078};
+//        double camD[9]={189.62 , 0,739.0365,0,271.3572,737.8754,0,0,1};
+//        double distCoeffD[5]={0.0454,-0.394,0.4363,-0.0053,0.00078};
+
+        //100万像素陆相机参数
+        double camD[9]={853.2785 , 0,307.2291,0,852.4253,227.778,0,0,1};
+        double distCoeffD[5]={0.1792,-0.2934,-0.0012,0.0026,-2.4351};
+
         //水里标定的参数
-        //double camD[9]={301.4028 , 0,1003.75,0,227.5788,1000.65,0,0,1};
+        //double camD[9]={1003.75, 0,301.4028,0,1000.65,227.5788,0,0,1};
         //double distCoeffD[5]={0.4368,-0.2404,-0.0161,0.0175,-10.2254};
 
         Mat camera_matrix=Mat(3,3,CV_64FC1,camD);

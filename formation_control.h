@@ -12,6 +12,8 @@ class formation_control
 public:
     formation_control();
     void line_formation_control(float direction_angle,float inter_distance);
+    void line_formation_control_for_test(float direction_angle,float inter_distance,vector<vector<float>> total_info);
+    vector<vector<float>> calc_displacement_test(vector<vector<float>> frames);
 private:
     vector<Mat>  grab_pictures();
     vector<vector<float>> calc_displacement(vector<Mat> frames);

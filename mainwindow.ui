@@ -243,7 +243,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>360</y>
+       <y>350</y>
        <width>171</width>
        <height>16</height>
       </rect>
@@ -252,25 +252,48 @@
       <string>PID parameter setting:</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="reset_pid">
+    <widget class="QPushButton" name="btn_start_formation">
      <property name="geometry">
       <rect>
-       <x>110</x>
+       <x>170</x>
        <y>430</y>
-       <width>81</width>
+       <width>141</width>
        <height>22</height>
       </rect>
      </property>
      <property name="text">
-      <string>reset pid</string>
+      <string>start Formation</string>
      </property>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
+    <widget class="QLabel" name="label_15">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>390</y>
-       <width>281</width>
+       <y>400</y>
+       <width>141</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Formation control:</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="cbx_formation_type">
+     <property name="geometry">
+      <rect>
+       <x>11</x>
+       <y>430</y>
+       <width>141</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>370</y>
+       <width>331</width>
        <height>24</height>
       </rect>
      </property>
@@ -317,8 +340,32 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="reset_pid">
+        <property name="text">
+         <string>reset pid</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
+    <zorder>forward_move</zorder>
+    <zorder>left_move</zorder>
+    <zorder>right_move</zorder>
+    <zorder>backward_move</zorder>
+    <zorder>reset_parameter</zorder>
+    <zorder>stop_engine</zorder>
+    <zorder>layoutWidget</zorder>
+    <zorder>layoutWidget</zorder>
+    <zorder>self_rotate</zorder>
+    <zorder>label_3</zorder>
+    <zorder>label_11</zorder>
+    <zorder>reset_pid</zorder>
+    <zorder>layoutWidget</zorder>
+    <zorder>layoutWidget</zorder>
+    <zorder>btn_start_formation</zorder>
+    <zorder>label_15</zorder>
+    <zorder>cbx_formation_type</zorder>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
