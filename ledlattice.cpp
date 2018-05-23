@@ -95,10 +95,11 @@ void ledLattice::showHanzi(int fd, uint8_t* hz)
     unsigned char logoCmd[6]=
     {
         0x25,//长度37
-        0x12,//设备号，在模块复位时上报。12C18ECB
-        0xC1,
-        0x8E,
-        0xCB,
+        0xFF,0xFF,0xFF,0xFF,
+//        0x12,//设备号，在模块复位时上报。12C18ECB
+//        0xC1,
+//        0x8E,
+//        0xCB,
         0x07,//命令号
     //点阵数据
     };

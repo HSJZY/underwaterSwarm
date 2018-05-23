@@ -76,3 +76,22 @@ void motor_c::drive_motor(int pin,int clockwise_multi, float duty_speed)
     digitalWrite(pin,LOW);
     delayMicroseconds(this->motor_full-speed);
 }
+
+void motor_c::single_motor_setup(int motor_pin)
+{
+    pinMode(motor_pin,OUTPUT);
+    for(int i=0;i<300;i++)
+    {
+        digitalWrite(motor_pin,HIGH);
+        delayMicroseconds(2000);
+        digitalWrite(motor_pin,LOW);
+        delayMicroseconds(500);
+    }
+    for(int i=0;i<300;i++)
+    {
+        digitalWrite(motor_pin,HIGH);
+        delayMicroseconds(700);
+        digitalWrite(motor_pin,LOW);
+        delayMicroseconds(1800);
+    }
+}

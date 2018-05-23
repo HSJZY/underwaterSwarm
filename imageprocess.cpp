@@ -111,12 +111,11 @@ vector<vector<Point2f>> imageProcess::separateBeacon(vector<RotatedRect> minRect
                     break;
                 }
             }
-            if(is_in_unique==false)
-            {
-                unique_rect.push_back(cur_rect);
-            }
         }
-
+        if(is_in_unique==false)
+        {
+            unique_rect.push_back(cur_rect);
+        }
     }
     return unique_rect;
 }

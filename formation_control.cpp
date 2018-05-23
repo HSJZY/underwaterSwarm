@@ -134,8 +134,8 @@ vector<vector<float>> formation_control::choose_nearest_two_neighbors_line(vecto
         //给定指定方向，计算当前点相对于给定方向的角度
         float cur_angle=vec_total_dis_angle[i][1]+cur_yaw-direction_angle;
         //以下cur_x代表垂直于给定方位上的分量，cur_y代表给定方向上的分量
-        float cur_x=cur_distance*cos(cur_angle);
-        float cur_y=cur_distance*sin(cur_angle);
+        float cur_x=cur_distance*sin(cur_angle);
+        float cur_y=cur_distance*cos(cur_angle);
         if(cur_angle>0)
         {
             //此时是在左边的情况
@@ -197,34 +197,34 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     else if(nearest_left.empty())
     {
         //此时机器人在最左侧
-        middle_x=inter_distance-nearest_right[0]*sin(nearest_right[1]);
+        middle_x=-inter_distance+(inter_distance+abs(nearest_right[0]*sin(nearest_right[1])))/2.0;
         middle_y=nearest_right[0]*cos(nearest_right[1]);
-        move_lateral_side=left_side;
+//        if(middle_x>0) move_lateral_side=
+//        move_lateral_side=left_side;
     }
     else if(nearest_right.empty())
     {
         //此时机器人在最右侧
-        middle_x=nearest_left[0]*sin(nearest_left[1])-inter_distance;
+        middle_x=inter_distance-(inter_distance+abs(nearest_left[0]*sin(nearest_left[1])))/2.0;
+//        middle_x=nearest_left[0]*sin(nearest_left[1])-inter_distance;
         middle_y=nearest_left[0]*cos(nearest_left[1]);
-        move_lateral_side=right_side;
+//        move_lateral_side=right_side;
     }
     else
     {
         //此时机器人两侧都有邻近机器人
-
         middle_x=(nearest_left[0]*sin(nearest_left[1])+nearest_right[0]*sin(nearest_right[1]))/2;
         middle_y=(nearest_left[0]*cos(nearest_left[1])+nearest_right[0]*cos(nearest_right[1]))/2;
-        if(middle_x<0)
-        {
-            //小于0说明当前机器人在中点的左边，需要向右边移动
-            move_lateral_side=right_side;
-        }
-        else
-        {
-            //大于0部分，说明机器人在中点的右边，需要向左边移动
-            move_lateral_side=left_side;
-        }
-
+    }
+    if(middle_x<0)
+    {
+        //小于0说明当前机器人在中点的左边，需要向右边移动
+        move_lateral_side=right_side;
+    }
+    else
+    {
+        //大于0部分，说明机器人在中点的右边，需要向左边移动
+        move_lateral_side=left_side;
     }
 
     move_x=abs(middle_x);

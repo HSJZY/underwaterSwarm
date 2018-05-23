@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->cbx_formation_type->addItem("Line_Formation");
 
     QImage *img=new QImage;
-    img->load("//home//pi//Desktop//uitest//images//robot_small.jpg");
+    img->load("//home//pi//Desktop//underwaterSwarm//images//robot_small.jpg");
     ui->label_3->setPixmap(QPixmap::fromImage(*img));
 
     this->ratio_angle_setted=0;
@@ -337,7 +337,7 @@ void MainWindow::on_screen_shot_clicked()
         if(this->is_able_shot==false) continue;
         for(int i=0;i<this->camera_frames.size();i++)
         {
-            string str_img="//home//pi//Desktop//uitest//images//camera"+std::to_string(i+1)+"//img"+std::to_string(cur_shot_nums)+".jpg";
+            string str_img="//home//pi//Desktop//underwaterSwarm//images//camera"+std::to_string(i+1)+"//img"+std::to_string(cur_shot_nums)+".jpg";
             imwrite(str_img,camera_frames[i]);
         }
         break;

@@ -141,7 +141,7 @@ void kinematicControl::SelfRotate(float target_angle)
     robotStatus curRobotStatue;
     motor_c motor_1,motor_2;
 //    motor_1.motor_setup();
-    float ratio_speed=0.6;
+    float ratio_speed=0.2;
     while(1)
     {
 
@@ -234,8 +234,8 @@ struct Robot_PID kinematicControl::MoveLateral(float target_angle,int side, floa
             last_diff_speed=diff_speed;
         }
 
-        left_speed=ratio_speed-last_diff_speed;
-        right_speed=ratio_speed+last_diff_speed;
+        left_speed=ratio_speed+last_diff_speed;
+        right_speed=ratio_speed-last_diff_speed;
 
         left_speed=std::max(std::min(left_speed,float(1)),float(0.01));
         right_speed=std::max(std::min(right_speed,float(1)),float(0.01));

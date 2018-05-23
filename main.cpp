@@ -121,13 +121,16 @@ int main(int argc, char *argv[])
     initMPU6050();
 //    test_camera(0,300);
 
+    ledLattice dianzhen;
+    dianzhen.show();
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
     return a.exec();
 
 
-    Mat frame0=imread("/home/pi/Desktop/uitest/images/img67.jpg"); //读入图片
+    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/test_1.jpg"); //读入图片
     imageProcess img_process;
     Mat res_frame;
     vector<vector<float> > res= img_process.getDistanceFromImage(frame0,res_frame);

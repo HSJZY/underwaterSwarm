@@ -152,7 +152,7 @@
       <item>
        <widget class="QLineEdit" name="ratio_speed">
         <property name="text">
-         <string>0</string>
+         <string>0.3</string>
         </property>
        </widget>
       </item>
@@ -288,7 +288,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>0</x>
@@ -308,7 +308,7 @@
       <item>
        <widget class="QLineEdit" name="k_p">
         <property name="text">
-         <string>1</string>
+         <string>1.4</string>
         </property>
        </widget>
       </item>
@@ -336,7 +336,7 @@
       <item>
        <widget class="QLineEdit" name="k_d">
         <property name="text">
-         <string>0</string>
+         <string>0.2</string>
         </property>
        </widget>
       </item>
@@ -356,11 +356,9 @@
     <zorder>reset_parameter</zorder>
     <zorder>stop_engine</zorder>
     <zorder>layoutWidget</zorder>
-    <zorder>layoutWidget</zorder>
     <zorder>self_rotate</zorder>
     <zorder>label_3</zorder>
     <zorder>label_11</zorder>
-    <zorder>reset_pid</zorder>
     <zorder>layoutWidget</zorder>
     <zorder>layoutWidget</zorder>
     <zorder>btn_start_formation</zorder>
