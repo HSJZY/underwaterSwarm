@@ -336,7 +336,7 @@
       <item>
        <widget class="QLineEdit" name="k_d">
         <property name="text">
-         <string>0.2</string>
+         <string>0.1</string>
         </property>
        </widget>
       </item>

@@ -4,9 +4,15 @@
 float robotStatus::m_initAngleOfMPU;
 float robotStatus::m_curAngleOfMPU;
 float robotStatus::m_absAngleOfMPU;
+
 float robotStatus::k_p;
 float robotStatus::k_i;
 float robotStatus::k_d;
+
+bool robotStatus::motor1_is_sleep;
+bool robotStatus::motor2_is_sleep;
+bool robotStatus::motor3_is_sleep;
+bool robotStatus::motor4_is_sleep;
 
 vector<Mat> robotStatus::vec_cur_frames;
 
@@ -20,6 +26,48 @@ void robotStatus::setZeroToAllMotor()
     this->motor2_speed=0;
     this->motor3_speed=0;
     this->motor4_speed=0;
+}
+
+void robotStatus::set_if_motor_is_sleep(int motor_pin, bool is_sleep)
+{
+    switch (motor_pin) {
+    case motor1_pin:
+        motor1_is_sleep=is_sleep;
+        break;
+    case motor2_pin:
+        motor2_is_sleep=is_sleep;
+        break;
+    case motor3_pin:
+        motor3_is_sleep=is_sleep;
+        break;
+    case motor4_pin:
+        motor4_is_sleep=is_sleep;
+        break;
+    default:
+        break;
+    }
+    return;
+}
+
+bool robotStatus::get_if_motor_is_sleep(int motor_pin)
+{
+    switch (motor_pin) {
+    case motor1_pin:
+        return motor1_is_sleep;
+        break;
+    case motor2_pin:
+        return motor2_is_sleep;
+        break;
+    case motor3_pin:
+        return motor3_is_sleep;
+        break;
+    case motor4_pin:
+        return motor4_is_sleep;
+        break;
+    default:
+        return false;
+        break;
+    }
 }
 
 void robotStatus::setKp(float setted_kp)

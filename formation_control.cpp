@@ -107,14 +107,17 @@ vector<vector<float>> formation_control::calc_displacement(vector<Mat> frames)
                 }
 
                 float angle_lattic=-atan2(img_displacement[j][0],img_displacement[j][2])+camera_pos/180.0*PI;
+
+                cout<<"test_atan2:"<<atan2(-4,140);
                 float distance_lattic=sqrt(pow(img_displacement[j][0],2)+pow(img_displacement[j][2],2))+radius_robot*1.8;//这里的1.8倍只是大概估计的值
                 cur_dis_ang.push_back(distance_lattic);
                 cur_dis_ang.push_back(angle_lattic);
                 lattic_dis_ang.push_back(cur_dis_ang);
+                cout<<"target_distance_amgle"<<distance_lattic<<angle_lattic<<endl;
             }
         }
     }
-    return lattic_dis_ang;
+     return lattic_dis_ang;
 }
 //挑选出直线编队中左右最近的机器人
 vector<vector<float>> formation_control::choose_nearest_two_neighbors_line(vector<vector<float> > vec_total_dis_angle,float direction_angle)
@@ -132,7 +135,7 @@ vector<vector<float>> formation_control::choose_nearest_two_neighbors_line(vecto
     {
         float cur_distance=vec_total_dis_angle[i][0];
         //给定指定方向，计算当前点相对于给定方向的角度
-        float cur_angle=vec_total_dis_angle[i][1]+cur_yaw-direction_angle;
+        float cur_angle=vec_total_dis_angle[i][1]+(cur_yaw-direction_angle)/180.0*PI;
         //以下cur_x代表垂直于给定方位上的分量，cur_y代表给定方向上的分量
         float cur_x=cur_distance*sin(cur_angle);
         float cur_y=cur_distance*cos(cur_angle);
@@ -219,12 +222,12 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     if(middle_x<0)
     {
         //小于0说明当前机器人在中点的左边，需要向右边移动
-        move_lateral_side=right_side;
+        move_lateral_side=left_side;
     }
     else
     {
         //大于0部分，说明机器人在中点的右边，需要向左边移动
-        move_lateral_side=left_side;
+        move_lateral_side=right_side;
     }
 
     move_x=abs(middle_x);
@@ -240,8 +243,8 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     //此处设定一个阈值为20mm，20mm之内不进行移动
     if(move_x>20)
     {
-            kine_control.MoveLateral(direction_angle,move_lateral_side,ratio_speed,move_lateral_time);
             kine_control.switchMode();
+            kine_control.MoveLateral(direction_angle,move_lateral_side,ratio_speed,move_lateral_time);
             is_moved==true;
     }
     if(move_y<20)
@@ -255,10 +258,11 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     }
     else
     {
-        if(middle_x>0)
+        if(middle_y>0)
         {
-            kine_control.MoveForward(direction_angle,ratio_speed,move_forward_time);
             kine_control.switchMode();
+            kine_control.MoveForward(direction_angle,ratio_speed,move_forward_time);
+
         }
         else
         {
@@ -267,9 +271,9 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
             {
                 move_angle-=360;
             }
-
-            kine_control.MoveForward(move_angle,ratio_speed,move_forward_time);
             kine_control.switchMode();
+            kine_control.MoveForward(move_angle,ratio_speed,move_forward_time);
+
         }
     }
 }

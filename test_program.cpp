@@ -19,23 +19,23 @@ void test_formation_alg()
     vec_single.push_back(214);
     vec_total.push_back(vec_single);
 
+    vec_single.push_back(-20);
+    vec_single.push_back(-28);
+    vec_single.push_back(160);
+    vec_total.push_back(vec_single);
+
     vec_single.clear();
     vec_single.push_back(-20);
     vec_single.push_back(-28);
     vec_single.push_back(214);
     vec_total.push_back(vec_single);
 
-    vec_single.clear();
-    vec_single.push_back(20);
-    vec_single.push_back(-28);
-    vec_single.push_back(214);
-    vec_total.push_back(vec_single);
 
-    vec_single.clear();
-    vec_single.push_back(20);
-    vec_single.push_back(-68);
-    vec_single.push_back(254);
-    vec_total.push_back(vec_single);
+//    vec_single.clear();
+//    vec_single.push_back(20);
+//    vec_single.push_back(-68);
+//    vec_single.push_back(254);
+//    vec_total.push_back(vec_single);
     formation_control formation;
     formation.line_formation_control_for_test(direction_angle,inter_distance,vec_total );
 

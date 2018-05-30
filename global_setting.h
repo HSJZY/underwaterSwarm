@@ -10,7 +10,7 @@
 #define motor1_clockwise_multi 1
 #define motor2_clockwise_multi 1
 #define motor3_clockwise_multi 1
-#define motor4_clockwise_multi -1
+#define motor4_clockwise_multi 1
 
 //运动方向定义
 #define left_side 0
@@ -21,7 +21,7 @@
 
 //定义四个摄像头的位置
 #define num_cameras 4
-#define camera_pos1 30
+#define camera_pos1 -90
 #define camera_pos2 0
 #define camera_pos3 0
 #define camera_pos4 0

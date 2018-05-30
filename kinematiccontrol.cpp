@@ -62,7 +62,7 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
     long int startTime=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
 
     long int lastTime=startTime;
-    motor_c motor_left,motor_right;
+    motor_c motor_left,motor_right,motor_third;
 
 
     Robot_PID robot_pid;
@@ -77,13 +77,16 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
     while(1){
         float cur_angle=curRobotStatue.getCurAngleOfMPU();
 
-        int motor_pin_left,motor_pin_right;
+        int motor_pin_left,motor_pin_right,motor_pin_left_back,motor_pin_right_back;
         float left_speed,right_speed,angle_diff;
         //确定需要往前或后走的电机
         if(target_angle>=-90 &&target_angle<=90)
         {
             motor_pin_left=motor3_pin;
             motor_pin_right=motor1_pin;
+            motor_pin_left_back=motor4_pin;
+            motor_pin_right_back=motor2_pin;
+
             angle_diff=target_angle-cur_angle;
 
             curRobotStatue.motor1_speed=last_right_speed;
@@ -93,6 +96,8 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
         {
             motor_pin_left=motor2_pin;
             motor_pin_right=motor4_pin;
+            motor_pin_left_back=motor1_pin;
+            motor_pin_right_back=motor3_pin;
 
             if (target_angle<0){target_angle+=360;}
             float cur_angle_tranfer=cur_angle+180;
@@ -122,6 +127,53 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
         left_speed=std::max(std::min(left_speed,float(1)),float(0.01));
         right_speed=std::max(std::min(right_speed,float(1)),float(0.01));
 
+        //添加第三个电机的转动来平衡产生的力差
+        float left_right_diff_speed=left_speed-right_speed;
+        int third_motor_pin;
+        float third_motor_speed;
+        if(left_right_diff_speed>0)
+        {
+            //左边速度大于右边，转动右后方的电机
+            third_motor_pin=motor_pin_right_back;
+            if(abs(left_right_diff_speed)>0.1)
+                third_motor_speed=0.2*abs(left_right_diff_speed);
+            else
+                third_motor_speed=0;
+
+            if(motor_pin_right_back==motor2_pin)
+            {
+                curRobotStatue.motor2_speed=third_motor_speed;
+            }
+            else if(motor_pin_right_back==motor3_pin)
+            {
+                curRobotStatue.motor3_speed=third_motor_speed;
+            }
+
+        }
+        else
+        {
+            //右边速度大于左边，转动左后方的电机
+            third_motor_pin=motor_pin_left_back;
+            third_motor_speed=0.2*abs(left_right_diff_speed);
+            if(abs(third_motor_speed)>0.1)
+            {
+                third_motor_speed=0.2*abs(left_right_diff_speed);
+            }
+            else
+            {
+                third_motor_speed=0;
+            }
+
+            if(motor_pin_left_back==motor4_pin)
+            {
+                curRobotStatue.motor4_speed=third_motor_speed;
+            }
+            else if(motor_pin_left_back==motor1_pin)
+            {
+                curRobotStatue.motor1_speed=third_motor_speed;
+            }
+        }
+
         last_left_speed=left_speed;
         last_right_speed=right_speed;
 
@@ -129,9 +181,11 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
         cout<<"current yaw...:"<<cur_angle<<"left_speed:"<<left_speed<<"right speed:"<<right_speed<<endl;
         thread left_motor_thread(this->drive_motor_thread_fun,motor_pin_left,left_speed,motor_left);
         thread right_motor_thread(this->drive_motor_thread_fun,motor_pin_right,right_speed,motor_right);
+        thread third_motor_thread(this->drive_motor_thread_fun,third_motor_pin,third_motor_speed,motor_third);
 
         left_motor_thread.join();
         right_motor_thread.join();
+        third_motor_thread.join();
     }
     return robot_pid;
 }

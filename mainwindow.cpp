@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     camera_timer = new QTimer(this);
+    camera_timer1 = new QTimer(this);
+    camera_timer2 = new QTimer(this);
+    camera_timer3 = new QTimer(this);
+    camera_timer4 = new QTimer(this);
+
     ui->advanced_angle->setText("0");
     ui->close_camera->setEnabled(false);
     ui->screen_shot->setEnabled(false);
@@ -32,8 +37,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QTimer *status_timer=new QTimer(this);
     status_timer->start(30);
-    connect(camera_timer,SIGNAL(timeout()),this,SLOT(videoUpdate()));
     connect(status_timer,SIGNAL(timeout()),this,SLOT(robotStatusUpdate()));
+
+//    QTimer *camera_timer2=new QTimer(this);
+//    camera_timer2->start(30);
+//    connect(camera_timer2,SIGNAL(timeout()),this,SLOT(videoUpdate2()));
+
+
+    connect(camera_timer,SIGNAL(timeout()),this,SLOT(videoUpdate()));
+    connect(camera_timer1,SIGNAL(timeout()),this,SLOT(video1Update()));
+    connect(camera_timer2,SIGNAL(timeout()),this,SLOT(video2Update()));
+    connect(camera_timer3,SIGNAL(timeout()),this,SLOT(video3Update()));
+    connect(camera_timer4,SIGNAL(timeout()),this,SLOT(video4Update()));
 }
 
 MainWindow::~MainWindow()
@@ -57,6 +72,7 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_open_camera_clicked()
 {
+    vec_cameras.clear();
     for(int i=0;i<num_cameras;i++)
     {
         camera camera_i(i);
@@ -65,25 +81,83 @@ void MainWindow::on_open_camera_clicked()
     }
 
 //    capture.open(0);
-    camera_timer->start(30);
+    camera_timer->start(40);
+    camera_timer1->start(100);
+    camera_timer2->start(100);
+    camera_timer3->start(100);
+    camera_timer4->start(100);
+
+
+
     ui->close_camera->setEnabled(true);
     ui->screen_shot->setEnabled(true);
     ui->open_camera->setEnabled(false);
     cout<<"open camera "<<endl;
+
+
 }
+
+void MainWindow::capture_thread(camera obj_camera, int i,Mat& frame)
+{
+    frame=obj_camera.CapturePicture();
+}
+
+//更新四个视频图片数据的函数
+void MainWindow::video1Update()
+{
+    camera cur_camera=vec_cameras[0];
+    Mat frame=cur_camera.CapturePicture();
+    this->camera1_img=frame;
+}
+void MainWindow::video2Update()
+{
+    camera cur_camera=vec_cameras[1];
+    Mat frame=cur_camera.CapturePicture();
+    this->camera2_img=frame;
+}
+void MainWindow::video3Update()
+{
+    camera cur_camera=vec_cameras[2];
+    Mat frame=cur_camera.CapturePicture();
+    this->camera3_img=frame;
+}
+void MainWindow::video4Update()
+{
+    camera cur_camera=vec_cameras[3];
+    Mat frame=cur_camera.CapturePicture();
+    this->camera4_img=frame;
+}
+
 //读取摄像头并显示在窗口
 void MainWindow::videoUpdate()
 {
 //    vector<Mat> camera_frames;
     this->camera_frames.clear();
     this->is_able_shot=false;
-    for(int i=0;i<num_cameras;i++)
+
+//    Mat frame1,frame2,frame3,frame4;
+
+
+//    std::thread thread_camera_1(this->capture_thread,vec_cameras[0],0, std::ref(frame1));
+//    std::thread thread_camera_2(this->capture_thread,vec_cameras[1],1,std::ref(frame2));
+//    std::thread thread_camera_3(this->capture_thread,vec_cameras[2],2,std::ref(frame3));
+//    std::thread thread_camera_4(this->capture_thread,vec_cameras[3],3,std::ref(frame4));
+//    thread_camera_1.join();
+//    thread_camera_2.join();
+//    thread_camera_3.join();
+//    thread_camera_4.join();
+    this->camera_frames.push_back(this->camera1_img);
+    this->camera_frames.push_back(this->camera2_img);
+    this->camera_frames.push_back(this->camera3_img);
+    this->camera_frames.push_back(this->camera4_img);
+
+
+    for(int i=0;i<camera_frames.size();i++)
     {
-        Mat camera_frame=vec_cameras[i].CapturePicture();
-        this->camera_frames.push_back(camera_frame);
-        if(!camera_frame.empty())
+        Mat cur_frame=camera_frames[i];
+        if(!cur_frame.empty())
         {
-            camera_image=cvMat2QImage(camera_frame);
+            camera_image=cvMat2QImage(cur_frame);
             QImage camera_result=camera_image.scaled(ui->camera1->width(),ui->camera1->height(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation).rgbSwapped();
             switch (i) {
             case 0:
@@ -103,10 +177,46 @@ void MainWindow::videoUpdate()
             }
         }
     }
+
+
+
+
+//    for(int i=0;i<int(num_cameras/2);i++)
+//    {
+//        Mat camera_frame=vec_cameras[i].CapturePicture();
+//        this->camera_frames.push_back(camera_frame);
+//        cout<<"camera:"<<i;
+//        if(!camera_frame.empty())
+//        {
+//            camera_image=cvMat2QImage(camera_frame);
+//            QImage camera_result=camera_image.scaled(ui->camera1->width(),ui->camera1->height(),Qt::IgnoreAspectRatio,Qt::SmoothTransformation).rgbSwapped();
+//            switch (i) {
+//            case 0:
+//                ui->camera1->setPixmap(QPixmap::fromImage(camera_result));
+//                break;
+//            case 1:
+//                ui->camera2->setPixmap(QPixmap::fromImage(camera_result));
+//                break;
+//            case 2:
+//                ui->camera3->setPixmap(QPixmap::fromImage(camera_result));
+//                break;
+//            case 3:
+//                ui->camera4->setPixmap(QPixmap::fromImage(camera_result));
+//                break;
+//            default:
+//                break;
+//            }
+//        }
+
+//    }
+    cout<<endl;
     robotStatus cur_robot_status;
     cur_robot_status.set_cur_frames(camera_frames);
     this->is_able_shot=true;
 }
+
+
+
 //更新机器人当前状态的数据
 void MainWindow::robotStatusUpdate()
 {
@@ -244,8 +354,8 @@ void MainWindow::on_forward_move_clicked()
 {
     stopping_all();
     ui->forward_move->setEnabled(false);
-    std::thread forward_tread(&MainWindow::move_tread,this,forward_side);
-    forward_tread.detach();
+    std::thread forward_thread(&MainWindow::move_tread,this,forward_side);
+    forward_thread.detach();
 }
 
 void MainWindow::on_stop_engine_clicked()
@@ -327,6 +437,11 @@ void MainWindow::on_close_camera_clicked()
     ui->close_camera->setEnabled(false);
     ui->screen_shot->setEnabled(false);
     camera_timer->stop();
+    camera_timer1->stop();
+    camera_timer2->stop();
+    camera_timer3->stop();
+    camera_timer4->stop();
+
     cout<<"cmaeras are closed"<<endl;
 }
 
@@ -345,11 +460,20 @@ void MainWindow::on_screen_shot_clicked()
     this->cur_shot_nums+=1;
 }
 
+
+void MainWindow::formation_thread_fun(float ratio_angle,float ratio_distance)
+{
+    formation_control line_formation_control;
+    line_formation_control.line_formation_control(ratio_angle,ratio_distance);
+}
+
 void MainWindow::on_btn_start_formation_clicked()
 {
     if(ui->cbx_formation_type->currentText()=="Line_Formation")
     {
-        formation_control line_formation_control;
-        line_formation_control.line_formation_control(this->ratio_angle_setted,1000);
+        float forward_angle=this->ratio_angle_setted;
+        std::thread formation_thread(this->formation_thread_fun,0,1000);
+        formation_thread.detach();
     }
+
 }

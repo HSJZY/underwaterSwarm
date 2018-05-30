@@ -69,6 +69,97 @@ void initMPU6050()
     mpuThread.detach();
 }
 
+
+//void listen_motor_thread()
+//{
+//    robotStatus listen_robot_status;
+
+//    struct timeval timerBreakStart,timerBreakEnd;
+//    gettimeofday(&timerBreakStart,NULL);
+//    long int startTime1=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
+//    long int startTime2=startTime1;
+//    long int startTime3=startTime1;
+//    long int startTime4=startTime1;
+
+//    while(1)
+//    {
+//        gettimeofday(&timerBreakEnd,NULL);
+//        long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
+
+//        float cur_motor1_speed=listen_robot_status.motor1_speed;
+//        float cur_motor2_speed=listen_robot_status.motor2_speed;
+//        float cur_motor3_speed=listen_robot_status.motor3_speed;
+//        float cur_motor4_speed=listen_robot_status.motor4_speed;
+
+//        if(cur_motor1_speed!=0.0)
+//        {
+//            listen_robot_status.set_if_motor_is_sleep(motor1_pin,false);
+//        }
+//        else
+//        {
+//            if(endTime-startTime1>=1000)
+//            {
+//                listen_robot_status.set_if_motor_is_sleep(motor1_pin,true);
+//                startTime1=endTime;
+//            }
+//        }
+
+//        if(cur_motor2_speed!=0.0)
+//        {
+//            listen_robot_status.set_if_motor_is_sleep(motor2_pin,false);
+//        }
+//        else
+//        {
+//            if(endTime-startTime2>=1000)
+//            {
+//                listen_robot_status.set_if_motor_is_sleep(motor2_pin,true);
+//                startTime2=endTime;
+//            }
+//        }
+
+//        if(cur_motor3_speed!=0.0)
+//        {
+//            listen_robot_status.set_if_motor_is_sleep(motor3_pin,false);
+//        }
+//        else
+//        {
+//            if(endTime-startTime3>=1000)
+//            {
+//                listen_robot_status.set_if_motor_is_sleep(motor3_pin,true);
+//                startTime3=endTime;
+//            }
+//        }
+
+//        if(cur_motor4_speed!=0.0)
+//        {
+//            listen_robot_status.set_if_motor_is_sleep(motor4_pin,false);
+//        }
+//        else
+//        {
+//            if(endTime-startTime4>=1000)
+//            {
+//                listen_robot_status.set_if_motor_is_sleep(motor4_pin,true);
+//                startTime1=endTime;
+//            }
+//        }
+
+
+//    }
+//
+//}
+
+void listen_motor()
+{
+    robotStatus listen_robot_status;
+    listen_robot_status.set_if_motor_is_sleep(motor1_pin,true);
+    listen_robot_status.set_if_motor_is_sleep(motor2_pin,true);
+    listen_robot_status.set_if_motor_is_sleep(motor3_pin,true);
+    listen_robot_status.set_if_motor_is_sleep(motor4_pin,true);
+
+//    thread listen_motor_thread(&listen_motor_thread);
+//    listen_motor_thread.detach();
+}
+
 void drive_motor_11(int motor_id,float speed,motor_c motor_1)
 {
         switch (motor_id) {
@@ -115,7 +206,7 @@ void test_camera(int ID,int num_pictures)
 int main(int argc, char *argv[])
 {
     wiringPiSetup();
-    test_formation_alg();
+//    test_formation_alg();
 
 //    motor_c motor1;
     initMPU6050();

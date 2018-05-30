@@ -4,6 +4,7 @@
 #include"mpu/demo_dmp.h"
 #include<vector>
 #include<opencv2/opencv.hpp>
+#include"global_setting.h"
 
 using namespace std;
 using namespace cv;
@@ -20,6 +21,8 @@ public:
     void setKp(float setted_kp);
     void setKi(float setted_ki);
     void setKd(float setted_kd);
+    void set_if_motor_is_sleep(int motor_pin,bool is_sleep);
+    bool get_if_motor_is_sleep(int motor_pin);
 
     void set_cur_frames(vector<Mat> vec_frames);
     vector<Mat> get_cur_frames();
@@ -38,6 +41,11 @@ private:
     static float m_initAngleOfMPU;
     static float m_curAngleOfMPU;
     static float m_absAngleOfMPU;
+
+    static bool motor1_is_sleep;
+    static bool motor2_is_sleep;
+    static bool motor3_is_sleep;
+    static bool motor4_is_sleep;
 
     static vector<Mat> vec_cur_frames;
 };
