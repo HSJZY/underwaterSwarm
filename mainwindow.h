@@ -29,7 +29,7 @@ public:
 
 private:
     void static capture_thread(camera obj_camera,int i,Mat& frame);
-    void static formation_thread_fun(float ratio_angle,float ratio_distance);
+//    void static formation_thread_fun(float ratio_angle,float ratio_distance);
 private slots:
 //    void on_pushButton_clicked();
 

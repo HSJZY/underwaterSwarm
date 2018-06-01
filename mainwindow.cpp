@@ -81,11 +81,11 @@ void MainWindow::on_open_camera_clicked()
     }
 
 //    capture.open(0);
-    camera_timer->start(40);
-    camera_timer1->start(100);
-    camera_timer2->start(100);
-    camera_timer3->start(100);
-    camera_timer4->start(100);
+    camera_timer->start(100);
+    camera_timer1->start(40);
+    camera_timer2->start(40);
+    camera_timer3->start(40);
+    camera_timer4->start(40);
 
 
 
@@ -461,7 +461,7 @@ void MainWindow::on_screen_shot_clicked()
 }
 
 
-void MainWindow::formation_thread_fun(float ratio_angle,float ratio_distance)
+void/* MainWindow::*/formation_thread_fun(float ratio_angle,float ratio_distance)
 {
     formation_control line_formation_control;
     line_formation_control.line_formation_control(ratio_angle,ratio_distance);
@@ -471,9 +471,10 @@ void MainWindow::on_btn_start_formation_clicked()
 {
     if(ui->cbx_formation_type->currentText()=="Line_Formation")
     {
-        float forward_angle=this->ratio_angle_setted;
-        std::thread formation_thread(this->formation_thread_fun,0,1000);
-        formation_thread.detach();
+//        formation_thread_fun();
+//        float forward_angle=this->ratio_angle_setted;
+        std::thread cur_formation_thread(/*this->*/formation_thread_fun,0,1000);
+        cur_formation_thread.detach();
     }
 
 }

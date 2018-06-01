@@ -8,6 +8,7 @@
 #include <wiringPi.h>
 #include <wiringSerial.h>
 #include <stdint.h>
+#include<iostream>
 
 class ledLattice
 {

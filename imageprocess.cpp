@@ -207,12 +207,18 @@ vector<vector<float>>  imageProcess::getDistanceFromImage(Mat frame0,Mat &res_fr
     Mat binary = Mat(imgSize, CV_8UC1);
     Mat eroDst= Mat(imgSize, CV_8UC1);
     brightAdjust(frame0, rawImg, 1, -120);  //每个像素每个通道的值都减去120
-    Mat bgr[3];
-    split(rawImg, bgr); //将三个通道的像素值分离
-    bImage = bgr[0];
-    gImage = bgr[1];
-    rImage = bgr[2];
-    getBinImage(gImage, rImage, binary, 40);    //如果像素G值-R值大于40，则返回的二值图像的值为255，否则为0
+    Mat gray;
+    cvtColor(rawImg,gray,COLOR_BGR2GRAY);
+    threshold(gray,binary,70,255,THRESH_BINARY);
+
+//    imshow("binary",binary);
+//    Mat bgr[3];
+//    split(rawImg, bgr); //将三个通道的像素值分离
+//    bImage = bgr[0];
+//    gImage = bgr[1];
+//    rImage = bgr[2];
+//    getBinImage(gImage, rImage, binary, 40);    //如果像素G值-R值大于40，则返回的二值图像的值为255，否则为0
+
     dilate(binary, dilDst, Mat(), Point(-1,-1), 2);   //图像膨胀
     erode(dilDst, eroDst, Mat(), Point(-1,-1), 1);  //图像腐蚀，先膨胀在腐蚀属于闭运算
     cv::namedWindow("dil_eroDst",(400,600));
@@ -280,8 +286,12 @@ vector<vector<float>> imageProcess::solveBeaconDistance(vector<vector<Point2f> >
 //        double distCoeffD[5]={0.0454,-0.394,0.4363,-0.0053,0.00078};
 
         //100万像素陆相机参数
-        double camD[9]={853.2785 , 0,307.2291,0,852.4253,227.778,0,0,1};
-        double distCoeffD[5]={0.1792,-0.2934,-0.0012,0.0026,-2.4351};
+//        double camD[9]={853.2785 , 0,307.2291,0,852.4253,227.778,0,0,1};
+//        double distCoeffD[5]={0.1792,-0.2934,-0.0012,0.0026,-2.4351};
+
+        //水里200万像素上相机参数
+        double camD[9]={553.5941 , 0,178.661,0,569.6427,158.612,0,0,1};
+        double distCoeffD[5]={0.5842,-0.8683,0.00056,-0.0074,1.086};
 
         //水里标定的参数
         //double camD[9]={1003.75, 0,301.4028,0,1000.65,227.5788,0,0,1};

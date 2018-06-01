@@ -206,10 +206,11 @@ void test_camera(int ID,int num_pictures)
 int main(int argc, char *argv[])
 {
     wiringPiSetup();
+    test_pnp();
 //    test_formation_alg();
 
 //    motor_c motor1;
-    initMPU6050();
+//    initMPU6050();
 //    test_camera(0,300);
 
     ledLattice dianzhen;

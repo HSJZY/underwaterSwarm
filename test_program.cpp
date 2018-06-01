@@ -2,7 +2,10 @@
 
 void test_pnp()
 {
-    Mat frame0=imread("/home/pi/Desktop/uitest/images/img71.jpg"); //读入图片
+    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/saved_img/test_image/img14.jpg"); //读入图片
+    Mat framw_resized;
+
+//    resize(frame0,framw_resized,Size(640,480));
     imageProcess img_process;
     Mat res_frame;
     vector<vector<float> > res= img_process.getDistanceFromImage(frame0,res_frame);

@@ -105,6 +105,7 @@ void ledLattice::showHanzi(int fd, uint8_t* hz)
     };
     sendCmd(fd,logoCmd,6);
     sendCmd(fd,hz,32);
+
 }
 
 void ledLattice::sendCmd(int fd,uint8_t* cmd, uint8_t len)

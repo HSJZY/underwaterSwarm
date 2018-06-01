@@ -16,8 +16,8 @@ void camera::OpenCamera()
 //    return;
 //    this->m_Capture.release();
     this->m_Capture.open(this->m_ID);
-    this->m_Capture.set(cv::CAP_PROP_FRAME_WIDTH,640);
-    this->m_Capture.set(cv::CAP_PROP_FRAME_HEIGHT,480);
+    this->m_Capture.set(cv::CAP_PROP_FRAME_WIDTH,352);
+    this->m_Capture.set(cv::CAP_PROP_FRAME_HEIGHT,288);
     //Mat edge
 //    int i=0;
 //    while(i<100)
@@ -31,7 +31,7 @@ void camera::OpenCamera()
 //        imwrite(str_img,frame);
 //        cv::waitKey(0);
 //        i++;
-//    }
+//
 }
 
 Mat camera::CapturePicture()
