@@ -81,11 +81,11 @@ void MainWindow::on_open_camera_clicked()
     }
 
 //    capture.open(0);
-    camera_timer->start(100);
-    camera_timer1->start(40);
-    camera_timer2->start(40);
-    camera_timer3->start(40);
-    camera_timer4->start(40);
+    camera_timer->start(150);
+    camera_timer1->start(120);
+    camera_timer2->start(110);
+    camera_timer3->start(100);
+    camera_timer4->start(90);
 
 
 

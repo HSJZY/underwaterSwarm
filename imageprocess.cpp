@@ -147,9 +147,13 @@ vector<vector<Point2f>> imageProcess::cacBoundRectRandomDirection(Mat eroDst, Ma
         }
     }
     res_frame=frame0;
-    cv::namedWindow("resultMat2",(400,600));
-    imshow("resultMat2",frame0);//在原图显示矩形框
-    waitKey(0);
+
+
+//    cv::namedWindow("resultMat2",(400,600));
+//    imshow("resultMat2",frame0);//在原图显示矩形框
+//    waitKey(0);
+
+
     return unique_rect;
 //   Mat resultMat=Mat::zeros(eroDst.size(),CV_8UC3);
 //    for(int i=0;i<minRect.size();i++)
@@ -222,7 +226,7 @@ vector<vector<float>>  imageProcess::getDistanceFromImage(Mat frame0,Mat &res_fr
     dilate(binary, dilDst, Mat(), Point(-1,-1), 2);   //图像膨胀
     erode(dilDst, eroDst, Mat(), Point(-1,-1), 1);  //图像腐蚀，先膨胀在腐蚀属于闭运算
     cv::namedWindow("dil_eroDst",(400,600));
-    imshow("dil_eroDst",eroDst);
+//    imshow("dil_eroDst",eroDst);
     vector<vector<Point2f>> v_bound_rects=cacBoundRectRandomDirection(eroDst,frame0,res_frame0);
     dist2agents=solveBeaconDistance(v_bound_rects, 40);
     return dist2agents;

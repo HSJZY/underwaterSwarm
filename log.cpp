@@ -12,6 +12,7 @@ Log::~Log()
 
 bool Log::Open(std::string sFileName)
 {
+    this->m_fileName=sFileName;
     m_tOLogFile.open(sFileName.c_str(), std::ios_base::out | std::ios_base::app);
 
     if( !m_tOLogFile )
@@ -41,10 +42,10 @@ bool Log::CommonLogInit()
     std::string sDateStr = ValueToStr(tLocalTime->tm_year+1900) + "-" +
         ValueToStr(tLocalTime->tm_mon+1) + "-" +
         ValueToStr(tLocalTime->tm_mday);
-    std::string strFileName="Log_" + sDateStr + ".log";
+    std::string strFileName="/home/pi/Desktop/underwaterSwarm/images/Log_" + sDateStr + ".log";
     this->m_fileName=strFileName;
 
-    return Open("Log_" + sDateStr + ".log");
+    return Open("/home/pi/Desktop/underwaterSwarm/images/Log_" + sDateStr + ".log");
 }
 
 void Log::Clear()

@@ -2,7 +2,12 @@
 
 formation_control::formation_control()
 {
-
+    Log log_file;
+    log_file.Open(this->log_name);
+//    log_file.CommonLogInit();
+    log_file.Clear();
+    log_file.Close();
+    std::cout<<"duandian";
 }
 
 void formation_control::line_formation_control(float direction_angle, float inter_distance)
@@ -12,6 +17,7 @@ void formation_control::line_formation_control(float direction_angle, float inte
         vector<vector<float>> total_dis_ang;
         total_dis_ang=calc_displacement(grab_pictures());
         vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
+        neighbor2Log(agents_both_sides);
         start_move_line(agents_both_sides,direction_angle,inter_distance);
     }
 }
@@ -23,6 +29,7 @@ void formation_control::line_formation_control_for_test(float direction_angle, f
         vector<vector<float>> total_dis_ang;
         total_dis_ang=calc_displacement_test(total_info);
         vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
+        neighbor2Log(agents_both_sides);
         start_move_line(agents_both_sides,direction_angle,inter_distance);
     }
 }
@@ -276,5 +283,46 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
 
         }
     }
+}
+
+void formation_control::neighbor2Log(vector<vector<float>> both_nearest_agents)
+{
+    Log log_file;
+//    log_file.CommonLogInit();
+    string file_name=this->log_name;
+    log_file.Open(file_name);
+
+    vector<float> nearest_left=both_nearest_agents[0];
+    vector<float> nearest_right=both_nearest_agents[1];
+
+    string current_time=log_file.GetTimeStr();
+    log_file<<current_time;
+    if(nearest_left.empty())
+    {
+        log_file<<" left: NULL NULL";
+
+    }
+    else
+    {
+        log_file<<" left: ";
+        log_file<<to_string(nearest_left[0]);
+        log_file<<" ";
+        log_file<<to_string(nearest_left[1]);
+    }
+
+    if(nearest_right.empty())
+    {
+        log_file<<" right: NULL NULL";
+
+    }
+    else
+    {
+        log_file<<" right: ";
+        log_file<<to_string(nearest_right[0]);
+        log_file<<" ";
+        log_file<<to_string(nearest_right[1]);
+    }
+    log_file.LogOutLn();
+    log_file.Close();
 }
 
