@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>742</width>
-    <height>552</height>
+    <width>873</width>
+    <height>639</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <x>10</x>
       <y>20</y>
       <width>331</width>
-      <height>471</height>
+      <height>511</height>
      </rect>
     </property>
     <property name="title">
@@ -349,6 +349,19 @@
       </item>
      </layout>
     </widget>
+    <widget class="QPushButton" name="btn_stop_formation">
+     <property name="geometry">
+      <rect>
+       <x>170</x>
+       <y>470</y>
+       <width>141</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>stop Formation</string>
+     </property>
+    </widget>
     <zorder>forward_move</zorder>
     <zorder>left_move</zorder>
     <zorder>right_move</zorder>
@@ -364,6 +377,7 @@
     <zorder>btn_start_formation</zorder>
     <zorder>label_15</zorder>
     <zorder>cbx_formation_type</zorder>
+    <zorder>btn_stop_formation</zorder>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
@@ -481,7 +495,7 @@
      <rect>
       <x>350</x>
       <y>370</y>
-      <width>391</width>
+      <width>471</width>
       <height>131</height>
      </rect>
     </property>
@@ -493,7 +507,7 @@
       <rect>
        <x>10</x>
        <y>40</y>
-       <width>161</width>
+       <width>201</width>
        <height>24</height>
       </rect>
      </property>
@@ -533,7 +547,7 @@
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>250</x>
        <y>20</y>
        <width>101</width>
        <height>16</height>
@@ -559,7 +573,7 @@
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>250</x>
        <y>100</y>
        <width>121</width>
        <height>24</height>
@@ -588,7 +602,7 @@
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>250</x>
        <y>80</y>
        <width>121</width>
        <height>24</height>
@@ -617,7 +631,7 @@
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>250</x>
        <y>60</y>
        <width>121</width>
        <height>24</height>
@@ -646,7 +660,7 @@
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>190</x>
+       <x>250</x>
        <y>40</y>
        <width>121</width>
        <height>24</height>
@@ -679,7 +693,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>742</width>
+     <width>873</width>
      <height>19</height>
     </rect>
    </property>

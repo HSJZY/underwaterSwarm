@@ -143,6 +143,7 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
             if(motor_pin_right_back==motor2_pin)
             {
                 curRobotStatue.motor2_speed=third_motor_speed;
+
             }
             else if(motor_pin_right_back==motor3_pin)
             {
@@ -154,8 +155,7 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
         {
             //右边速度大于左边，转动左后方的电机
             third_motor_pin=motor_pin_left_back;
-            third_motor_speed=0.2*abs(left_right_diff_speed);
-            if(abs(third_motor_speed)>0.1)
+            if(abs(left_right_diff_speed)>0.1)
             {
                 third_motor_speed=0.2*abs(left_right_diff_speed);
             }
@@ -198,23 +198,36 @@ void kinematicControl::SelfRotate(float target_angle)
     float ratio_speed=0.2;
     while(1)
     {
+        int motor_pin_1,motor_pin_2;
+        float cur_angle=curRobotStatue.getCurAngleOfMPU();
+        float cur_ratio_speed=ratio_speed*(0.5+abs(cur_angle-target_angle)/30);
+        if(cur_angle<target_angle)
+        {
+            motor_pin_1=motor1_pin;
+            motor_pin_2=motor4_pin;
+            curRobotStatue.motor1_speed=cur_ratio_speed;
+            curRobotStatue.motor4_speed=cur_ratio_speed;
+        }
+        else
+        {
+            motor_pin_1=motor2_pin;
+            motor_pin_2=motor3_pin;
+            curRobotStatue.motor2_speed=cur_ratio_speed;
+            curRobotStatue.motor3_speed=cur_ratio_speed;
+        }
 
-        int motor_pin_1=motor1_pin;
-        int motor_pin_2=motor4_pin;
-        curRobotStatue.motor1_speed=ratio_speed;
-        curRobotStatue.motor4_speed=ratio_speed;
-
-        thread first_motor_thread(this->drive_motor_thread_fun,motor_pin_1,ratio_speed,motor_1);
-        thread second_motor_thread(this->drive_motor_thread_fun,motor_pin_2,ratio_speed,motor_2);
+        thread first_motor_thread(this->drive_motor_thread_fun,motor_pin_1,cur_ratio_speed,motor_1);
+        thread second_motor_thread(this->drive_motor_thread_fun,motor_pin_2,cur_ratio_speed,motor_2);
         first_motor_thread.join();
         second_motor_thread.join();
 
-        float cur_angle=curRobotStatue.getCurAngleOfMPU();
-
         cout<<"current angle:"<<cur_angle<<"target andle:"<<target_angle<<"diff:"<<abs(target_angle-cur_angle)<<endl;
 
-        if(abs(target_angle-cur_angle)<2)
+        if(abs(target_angle-cur_angle)<6)
+        {
+            delay(1000);
             break;
+        }
     }
     curRobotStatue.motor1_speed=0;
     curRobotStatue.motor2_speed=0;

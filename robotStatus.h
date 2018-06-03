@@ -24,6 +24,9 @@ public:
     void set_if_motor_is_sleep(int motor_pin,bool is_sleep);
     bool get_if_motor_is_sleep(int motor_pin);
 
+    void set_formation_stop(bool is_stop);
+    bool get_formation_is_stop_state();
+
     void set_cur_frames(vector<Mat> vec_frames);
     vector<Mat> get_cur_frames();
 
@@ -41,6 +44,8 @@ private:
     static float m_initAngleOfMPU;
     static float m_curAngleOfMPU;
     static float m_absAngleOfMPU;
+
+    static bool formation_stop;
 
     static bool motor1_is_sleep;
     static bool motor2_is_sleep;

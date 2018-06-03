@@ -74,6 +74,8 @@ private slots:
 
     void on_btn_start_formation_clicked();
 
+    void on_btn_stop_formation_clicked();
+
 private:
     Ui::MainWindow *ui;
     cv::VideoCapture capture;
@@ -100,6 +102,7 @@ private:
     bool is_stop;
     bool is_able_shot;
     int cur_shot_nums;
+    bool formation_is_stop;
 };
 
 #endif // MAINWINDOW_H

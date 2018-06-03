@@ -14,10 +14,22 @@ bool robotStatus::motor2_is_sleep;
 bool robotStatus::motor3_is_sleep;
 bool robotStatus::motor4_is_sleep;
 
+bool robotStatus::formation_stop;
+
 vector<Mat> robotStatus::vec_cur_frames;
 
 robotStatus::robotStatus()
 {
+}
+
+
+bool robotStatus::get_formation_is_stop_state()
+{
+    return this->formation_stop;
+}
+void robotStatus::set_formation_stop(bool is_stop)
+{
+    this->formation_stop=is_stop;
 }
 
 void robotStatus::setZeroToAllMotor()
@@ -91,7 +103,7 @@ void robotStatus::setInitAngleOfMPU(float angle)
 void robotStatus::setAbsAngleOfMPU(float angle)
 {
     this->m_absAngleOfMPU=angle;
-    float curAngleOfMPU=m_absAngleOfMPU-m_initAngleOfMPU;
+    float curAngleOfMPU=angle-m_initAngleOfMPU;
     if(curAngleOfMPU>180)
     {
         curAngleOfMPU=curAngleOfMPU-360;
@@ -105,6 +117,7 @@ void robotStatus::setAbsAngleOfMPU(float angle)
 
 float robotStatus::getCurAngleOfMPU()
 {
+//    return  m_absAngleOfMPU;
     return this->m_curAngleOfMPU;
 }
 //获取当前摄像头拍取的图片

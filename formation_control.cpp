@@ -12,12 +12,19 @@ formation_control::formation_control()
 
 void formation_control::line_formation_control(float direction_angle, float inter_distance)
 {
+    robotStatus cur_robot_state;
     while(1)
     {
+        if (cur_robot_state.get_formation_is_stop_state()==true)break;
         vector<vector<float>> total_dis_ang;
         total_dis_ang=calc_displacement(grab_pictures());
         vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
-        neighbor2Log(agents_both_sides);
+
+        if(!agents_both_sides[0].empty()||!agents_both_sides[1].empty())
+        {
+            neighbor2Log(agents_both_sides);
+        }
+
         start_move_line(agents_both_sides,direction_angle,inter_distance);
     }
 }
@@ -104,6 +111,7 @@ vector<vector<float>> formation_control::calc_displacement(vector<Mat> frames)
                     break;
                 case 1:
                     camera_pos=camera_pos2;
+                    break;
                 case 2:
                     camera_pos=camera_pos3;
                     break;
@@ -197,10 +205,17 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     vector<float> nearest_left=both_nearest_agents[0];
     vector<float> nearest_right=both_nearest_agents[1];
 
-    float middle_x,middle_y;
+    float middle_x=0;
+    float middle_y=0;
 
     if(nearest_left.empty()&&nearest_right.empty())
     {
+        robotStatus is_to_get_yaw;
+        float cur_yaw=is_to_get_yaw.getCurAngleOfMPU();
+        if(abs(cur_yaw-direction_angle)>15)
+        {
+            kine_control.SelfRotate(direction_angle);
+        }
         //此时该机器人属于失联状态,保持不动
         return;
     }
@@ -241,10 +256,10 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     move_y=abs(middle_y);
 
     //插补的方式进行运动，先横向，后纵向
-    float kp=3;
-    float ratio_speed=0.4;
-    float move_lateral_time=3000*move_x/10000*kp;
-    float move_forward_time=3000*move_y/10000*kp;
+    float kp_1=3,kp_2=3;
+    float ratio_speed=0.3;
+    float move_lateral_time=3000*(0.3+move_x/1000*kp_1);
+    float move_forward_time=3000*(0.3+move_y/1000*kp_2);
 
     bool is_moved=false;
     //此处设定一个阈值为20mm，20mm之内不进行移动
@@ -256,11 +271,6 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     }
     if(move_y<20)
     {
-        if(is_moved==false)
-        {
-            delay(2000);
-            kine_control.switchMode();
-        }
         return;
     }
     else
@@ -269,7 +279,6 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
         {
             kine_control.switchMode();
             kine_control.MoveForward(direction_angle,ratio_speed,move_forward_time);
-
         }
         else
         {

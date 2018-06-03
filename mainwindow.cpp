@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->close_camera->setEnabled(false);
     ui->screen_shot->setEnabled(false);
     ui->cbx_formation_type->addItem("Line_Formation");
+    this->formation_is_stop=true;
 
     QImage *img=new QImage;
     img->load("//home//pi//Desktop//underwaterSwarm//images//robot_small.jpg");
@@ -463,6 +464,8 @@ void MainWindow::on_screen_shot_clicked()
 
 void/* MainWindow::*/formation_thread_fun(float ratio_angle,float ratio_distance)
 {
+    robotStatus cur_robot_status;
+    cur_robot_status.set_formation_stop(false);
     formation_control line_formation_control;
     line_formation_control.line_formation_control(ratio_angle,ratio_distance);
 }
@@ -473,8 +476,15 @@ void MainWindow::on_btn_start_formation_clicked()
     {
 //        formation_thread_fun();
 //        float forward_angle=this->ratio_angle_setted;
-        std::thread cur_formation_thread(/*this->*/formation_thread_fun,0,1000);
+        std::thread cur_formation_thread(/*this->*/formation_thread_fun,0,600);
         cur_formation_thread.detach();
     }
 
+}
+
+void MainWindow::on_btn_stop_formation_clicked()
+{
+
+    robotStatus cur_robot_status;
+    cur_robot_status.set_formation_stop(true);
 }
