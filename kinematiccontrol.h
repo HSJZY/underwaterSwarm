@@ -24,6 +24,7 @@ public:
     void switchMode();
     struct Robot_PID get_first_pid();
     void set_first_pid(float k_p,float k_i,float k_d);
+    void back_rotate_two_motor(int side,float ratio_speed,float duration_ms);
 private:
     void static drive_motor_thread_fun(int motor_id,float speed,motor_c motor);
     static struct Robot_PID first_pid;

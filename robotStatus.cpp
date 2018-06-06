@@ -102,6 +102,9 @@ void robotStatus::setInitAngleOfMPU(float angle)
 
 void robotStatus::setAbsAngleOfMPU(float angle)
 {
+    //简单去噪
+    if(abs(angle-this->m_absAngleOfMPU)>90)
+        angle=this->m_absAngleOfMPU;
     this->m_absAngleOfMPU=angle;
     float curAngleOfMPU=angle-m_initAngleOfMPU;
     if(curAngleOfMPU>180)

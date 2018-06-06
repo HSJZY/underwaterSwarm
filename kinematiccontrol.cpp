@@ -135,8 +135,8 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
         {
             //左边速度大于右边，转动右后方的电机
             third_motor_pin=motor_pin_right_back;
-            if(abs(left_right_diff_speed)>0.1)
-                third_motor_speed=0.2*abs(left_right_diff_speed);
+            if(abs(left_right_diff_speed)>0.06)
+                third_motor_speed=0.4*abs(left_right_diff_speed);
             else
                 third_motor_speed=0;
 
@@ -155,9 +155,9 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
         {
             //右边速度大于左边，转动左后方的电机
             third_motor_pin=motor_pin_left_back;
-            if(abs(left_right_diff_speed)>0.1)
+            if(abs(left_right_diff_speed)>0.06)
             {
-                third_motor_speed=0.2*abs(left_right_diff_speed);
+                third_motor_speed=0.4*abs(left_right_diff_speed);
             }
             else
             {
@@ -195,12 +195,14 @@ void kinematicControl::SelfRotate(float target_angle)
     robotStatus curRobotStatue;
     motor_c motor_1,motor_2;
 //    motor_1.motor_setup();
-    float ratio_speed=0.2;
+    float ratio_speed=0.15;
+    float rotation_angle=abs(curRobotStatue.getCurAngleOfMPU()-target_angle);
     while(1)
     {
         int motor_pin_1,motor_pin_2;
         float cur_angle=curRobotStatue.getCurAngleOfMPU();
-        float cur_ratio_speed=ratio_speed*(0.5+abs(cur_angle-target_angle)/30);
+        float cur_ratio_speed=ratio_speed*(0.4+abs(cur_angle-target_angle)/30);
+        cur_ratio_speed=std::min(cur_ratio_speed,ratio_speed);
         if(cur_angle<target_angle)
         {
             motor_pin_1=motor1_pin;
@@ -216,16 +218,47 @@ void kinematicControl::SelfRotate(float target_angle)
             curRobotStatue.motor3_speed=cur_ratio_speed;
         }
 
+        cout<<"speed:"<<cur_ratio_speed;
         thread first_motor_thread(this->drive_motor_thread_fun,motor_pin_1,cur_ratio_speed,motor_1);
         thread second_motor_thread(this->drive_motor_thread_fun,motor_pin_2,cur_ratio_speed,motor_2);
         first_motor_thread.join();
         second_motor_thread.join();
 
         cout<<"current angle:"<<cur_angle<<"target andle:"<<target_angle<<"diff:"<<abs(target_angle-cur_angle)<<endl;
-
-        if(abs(target_angle-cur_angle)<6)
+        float start_back_rotation=std::min(double(10),6*rotation_angle/30.0);
+        if(abs(target_angle-cur_angle)<start_back_rotation)
         {
-            delay(1000);
+            struct timeval timerBreakStart,timerBreakEnd;
+            gettimeofday(&timerBreakStart,NULL);
+            long int startTime=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
+
+            int back_direction_time;
+            float back_move_spped;
+            if(rotation_angle>30)
+            {
+                back_direction_time=2000;
+                back_move_spped=-3*cur_ratio_speed;
+            }
+            else
+            {
+                back_direction_time=1000;
+                back_move_spped=-2*cur_ratio_speed;
+            }
+            while(1)
+            {
+                thread first_motor_thread(this->drive_motor_thread_fun,motor_pin_1,back_move_spped,motor_1);
+                thread second_motor_thread(this->drive_motor_thread_fun,motor_pin_2,back_move_spped,motor_2);
+                first_motor_thread.join();
+                second_motor_thread.join();
+                gettimeofday(&timerBreakEnd,NULL);
+                long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
+                if(endTime-startTime>back_direction_time)
+                {
+                    break;
+                }
+            }
+
+            delay(50);
             break;
         }
     }
@@ -253,9 +286,9 @@ struct Robot_PID kinematicControl::MoveLateral(float target_angle,int side, floa
     }
     float angle_diff,left_speed,right_speed;
     robotStatus cur_robot_statue;
-    motor_c left_motor,right_motor;
+    motor_c left_motor,right_motor,motor_third;
 //    left_motor.motor_setup();
-    int motor_pin_left,motor_pin_right;
+    int motor_pin_left,motor_pin_right,motor_pin_left_back,motor_pin_right_back,third_motor_pin;
 
     struct timeval timerBreakStart,timerBreakEnd;
     gettimeofday(&timerBreakStart,NULL);
@@ -276,6 +309,10 @@ struct Robot_PID kinematicControl::MoveLateral(float target_angle,int side, floa
             angle_diff=target_angle-cur_angle;
             motor_pin_left=motor1_pin;
             motor_pin_right=motor2_pin;
+
+            motor_pin_left_back=motor3_pin;
+            motor_pin_right_back=motor4_pin;
+
             cur_robot_statue.motor1_speed=last_left_speed;
             cur_robot_statue.motor2_speed=last_right_speed;
         }
@@ -283,6 +320,10 @@ struct Robot_PID kinematicControl::MoveLateral(float target_angle,int side, floa
             angle_diff=target_angle-cur_angle;
             motor_pin_left=motor4_pin;
             motor_pin_right=motor3_pin;
+
+            motor_pin_left_back=motor2_pin;
+            motor_pin_right_back =motor1_pin;
+
             cur_robot_statue.motor3_speed=last_right_speed;
             cur_robot_statue.motor4_speed=last_left_speed;
         }
@@ -307,15 +348,61 @@ struct Robot_PID kinematicControl::MoveLateral(float target_angle,int side, floa
         left_speed=std::max(std::min(left_speed,float(1)),float(0.01));
         right_speed=std::max(std::min(right_speed,float(1)),float(0.01));
 
+        float left_right_diff=left_speed-right_speed;
+        float third_motor_speed;
+        if(left_right_diff>0)
+        {
+            third_motor_pin=motor_pin_right_back;
+            if(abs(left_right_diff)>0.06)
+            {
+                third_motor_speed=0.2*abs(left_right_diff);
+            }
+            else
+            {
+                third_motor_speed=0;
+            }
+            if(third_motor_pin==motor4_pin)
+            {
+                cur_robot_statue.motor4_speed=third_motor_speed;
+            }
+            else if(third_motor_pin==motor1_pin)
+            {
+                cur_robot_statue.motor1_speed=third_motor_speed;
+            }
+        }
+        else
+        {
+            third_motor_pin=motor_pin_left_back;
+            if(abs(left_right_diff)>0.06)
+            {
+                third_motor_speed=0.2*abs(left_right_diff);
+            }
+            else
+            {
+                third_motor_speed=0;
+            }
+
+            if(third_motor_pin==motor3_pin)
+            {
+                cur_robot_statue.motor3_speed=third_motor_speed;
+            }
+            else if(third_motor_pin==motor2_pin)
+            {
+                cur_robot_statue.motor2_speed=third_motor_speed;
+            }
+        }
+
         last_left_speed=left_speed;
         last_right_speed=right_speed;
 
         cout<<"current yaw...:"<<cur_angle<<" target_angle: "<<target_angle<<" left_speed:"<<left_speed<<"right speed:"<<right_speed<<"angle diff: "<<angle_diff<<"last diff speed"<<last_diff_speed<<endl;
         thread left_motor_thread(this->drive_motor_thread_fun,motor_pin_left,left_speed,left_motor);
         thread right_motor_thread(this->drive_motor_thread_fun,motor_pin_right,right_speed,right_motor);
+        thread third_motor_thread(this->drive_motor_thread_fun,third_motor_pin,third_motor_speed,motor_third);
 
         left_motor_thread.join();
         right_motor_thread.join();
+        third_motor_thread.join();
     }
     cur_robot_statue.motor1_speed=0;
     cur_robot_statue.motor2_speed=0;
@@ -323,4 +410,50 @@ struct Robot_PID kinematicControl::MoveLateral(float target_angle,int side, floa
     cur_robot_statue.motor4_speed=0;
 
     return robot_pid;
+}
+
+void kinematicControl::back_rotate_two_motor(int side, float ratio_speed, float duration_ms)
+{
+    int motor_pin_1,motor_pin_2;
+    switch (side) {
+    case left_side:
+        motor_pin_1=motor3_pin;
+        motor_pin_2=motor4_pin;
+        break;
+    case right_side:
+        motor_pin_1=motor2_pin;
+        motor_pin_2=motor1_pin;
+        break;
+    case forward_side:
+        motor_pin_1=motor1_pin;
+        motor_pin_2=motor3_pin;
+        break;
+    case backward_side:
+        motor_pin_1=motor2_pin;
+        motor_pin_2=motor4_pin;
+        break;
+    default:
+        break;
+    }
+
+    //这个函数只提供短时间内的反向推力。
+    struct timeval timerBreakStart,timerBreakEnd;
+    gettimeofday(&timerBreakStart,NULL);
+    long int startTime=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
+    motor_c motor_1,motor_2;
+    while(1)
+    {
+        gettimeofday(&timerBreakEnd,NULL);
+        long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
+        if(endTime-startTime>=duration_ms)
+        {
+            break;
+        }
+
+
+        thread motor_1_thread(this->drive_motor_thread_fun,motor_pin_1,-1*abs(ratio_speed),motor_1);
+        thread motor_2_thread(this->drive_motor_thread_fun,motor_pin_2,-1*abs(ratio_speed),motor_2);
+        motor_1_thread.join();
+        motor_2_thread.join();
+    }
 }
