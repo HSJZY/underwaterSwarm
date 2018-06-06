@@ -2,7 +2,7 @@
 
 void test_pnp()
 {
-    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/saved_img/test_image/img14.jpg"); //读入图片
+    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/saved_img/test_image/contain_distance/img4.jpg"); //读入图片
     Mat framw_resized;
 
 //    resize(frame0,framw_resized,Size(640,480));
@@ -14,7 +14,7 @@ void test_pnp()
 void test_formation_alg()
 {
     float direction_angle=0;
-    float inter_distance=1000;
+    float inter_distance=600;
     vector<vector<float>> vec_total;
     vector<float> vec_single;
     vec_single.push_back(-20);
@@ -22,16 +22,16 @@ void test_formation_alg()
     vec_single.push_back(214);
     vec_total.push_back(vec_single);
 
-    vec_single.push_back(-20);
-    vec_single.push_back(-28);
-    vec_single.push_back(160);
-    vec_total.push_back(vec_single);
+//    vec_single.push_back(-20);
+//    vec_single.push_back(-28);
+//    vec_single.push_back(160);
+//    vec_total.push_back(vec_single);
 
-    vec_single.clear();
-    vec_single.push_back(-20);
-    vec_single.push_back(-28);
-    vec_single.push_back(214);
-    vec_total.push_back(vec_single);
+//    vec_single.clear();
+//    vec_single.push_back(-20);
+//    vec_single.push_back(-28);
+//    vec_single.push_back(214);
+//    vec_total.push_back(vec_single);
 
 
 //    vec_single.clear();

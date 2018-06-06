@@ -21,7 +21,7 @@ private:
 
         int min_speed_anticlockwise=1390;
         int max_speed_anticlockwise=1290;
-        int min_speed_clockwise=1410;
+        int min_speed_clockwise=1430;
         int max_speed_clockwise=1540;
 public:
     motor_c();

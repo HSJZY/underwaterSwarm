@@ -76,6 +76,8 @@ private slots:
 
     void on_btn_stop_formation_clicked();
 
+    void on_advanced_angle_textChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     cv::VideoCapture capture;

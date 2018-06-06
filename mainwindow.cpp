@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     on_reset_pid_clicked();
 
     QTimer *status_timer=new QTimer(this);
-    status_timer->start(30);
+    status_timer->start(100);
     connect(status_timer,SIGNAL(timeout()),this,SLOT(robotStatusUpdate()));
 
 //    QTimer *camera_timer2=new QTimer(this);
@@ -487,4 +487,9 @@ void MainWindow::on_btn_stop_formation_clicked()
 
     robotStatus cur_robot_status;
     cur_robot_status.set_formation_stop(true);
+}
+
+void MainWindow::on_advanced_angle_textChanged(const QString &arg1)
+{
+    ui->reset_parameter->setEnabled(true);
 }
