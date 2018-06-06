@@ -24,6 +24,7 @@ private:
     void start_move_line(vector<vector<float>>  both_nearest_agents,float direction_angle, float inter_distance);
 
     void neighbor2Log(vector<vector<float>> both_nearest_agents);
+    void self_rotate_to_direction(float direction);
 private:
     vector<Mat> cur_frames;
 

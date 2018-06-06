@@ -4,10 +4,8 @@ formation_control::formation_control()
 {
     Log log_file;
     log_file.Open(this->log_name);
-//    log_file.CommonLogInit();
     log_file.Clear();
     log_file.Close();
-    std::cout<<"duandian";
 }
 
 void formation_control::line_formation_control(float direction_angle, float inter_distance)
@@ -16,6 +14,7 @@ void formation_control::line_formation_control(float direction_angle, float inte
     while(1)
     {
         if (cur_robot_state.get_formation_is_stop_state()==true)break;
+        self_rotate_to_direction(direction_angle);
         vector<vector<float>> total_dis_ang;
         total_dis_ang=calc_displacement(grab_pictures());
         vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
@@ -24,8 +23,18 @@ void formation_control::line_formation_control(float direction_angle, float inte
         {
             neighbor2Log(agents_both_sides);
         }
-
         start_move_line(agents_both_sides,direction_angle,inter_distance);
+    }
+}
+
+void formation_control::self_rotate_to_direction(float direction)
+{
+    robotStatus cur_robot_status;
+    if(abs(cur_robot_status.getCurAngleOfMPU()-direction)>10)
+    {
+        kinematicControl kine_control;
+        kine_control.switchMode();
+        kine_control.SelfRotate(direction);
     }
 }
 
@@ -208,14 +217,17 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     float middle_x=0;
     float middle_y=0;
 
+    // 获取当前的角度用于当前方向的修正
+//    robotStatus is_to_get_yaw;
+//    float cur_yaw=is_to_get_yaw.getCurAngleOfMPU();
+//    if(abs(cur_yaw-direction_angle)>15)
+//    {
+//        kine_control.switchMode();
+//        kine_control.SelfRotate(direction_angle);
+//    }
+
     if(nearest_left.empty()&&nearest_right.empty())
     {
-        robotStatus is_to_get_yaw;
-        float cur_yaw=is_to_get_yaw.getCurAngleOfMPU();
-        if(abs(cur_yaw-direction_angle)>15)
-        {
-            kine_control.SelfRotate(direction_angle);
-        }
         //此时该机器人属于失联状态,保持不动
         return;
     }
@@ -241,6 +253,7 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
         middle_x=(nearest_left[0]*sin(nearest_left[1])+nearest_right[0]*sin(nearest_right[1]))/2;
         middle_y=(nearest_left[0]*cos(nearest_left[1])+nearest_right[0]*cos(nearest_right[1]))/2;
     }
+
     if(middle_x<0)
     {
         //小于0说明当前机器人在中点的左边，需要向右边移动
@@ -256,20 +269,22 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     move_y=abs(middle_y);
 
     //插补的方式进行运动，先横向，后纵向
-    float kp_1=3,kp_2=3;
-    float ratio_speed=0.3;
-    float move_lateral_time=3000*(0.3+move_x/1000*kp_1);
-    float move_forward_time=3000*(0.3+move_y/1000*kp_2);
+    float kp_1=4,kp_2=2;
+    float ratio_speed=0.25;
+    float move_lateral_time=3000*(move_x/1000*kp_1);
+    float move_forward_time=1000*(move_y/1000*kp_2);
 
-    bool is_moved=false;
-    //此处设定一个阈值为20mm，20mm之内不进行移动
-    if(move_x>20)
+//    bool is_moved=false;
+    //此处设定一个阈值为80mm，80mm之内不进行移动
+    if(move_x>80)
     {
             kine_control.switchMode();
             kine_control.MoveLateral(direction_angle,move_lateral_side,ratio_speed,move_lateral_time);
-            is_moved==true;
+            float back_time=std::min(move_lateral_time/5.0,double(1000));
+            kine_control.back_rotate_two_motor(move_lateral_side,ratio_speed,back_time);
+//            is_moved==true;
     }
-    if(move_y<20)
+    if(move_y<50)
     {
         return;
     }
@@ -279,6 +294,8 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
         {
             kine_control.switchMode();
             kine_control.MoveForward(direction_angle,ratio_speed,move_forward_time);
+            float back_time=std::min(move_forward_time/5.0,double(1000));
+            kine_control.back_rotate_two_motor(forward_side,ratio_speed,back_time);
         }
         else
         {
@@ -289,6 +306,8 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
             }
             kine_control.switchMode();
             kine_control.MoveForward(move_angle,ratio_speed,move_forward_time);
+            float back_time=std::min(move_forward_time/5.0,double(1000));
+            kine_control.back_rotate_two_motor(backward_side,ratio_speed,back_time);
 
         }
     }
