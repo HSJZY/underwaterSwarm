@@ -1,13 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-template <class T>
-class utils
-{
-public:
-    utils();
-    T max(T val1,T val2);
-    T min(T val1,T val2);
-};
+#include<string>
+#include<iostream>
+#include<vector>
+using namespace std;
 
+void split_string(const string original_str,vector<string>& vec_strs,const string& split_char);
 #endif // UTILS_H
