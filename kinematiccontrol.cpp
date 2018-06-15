@@ -450,7 +450,6 @@ void kinematicControl::back_rotate_two_motor(int side, float ratio_speed, float 
             break;
         }
 
-
         thread motor_1_thread(this->drive_motor_thread_fun,motor_pin_1,-1*abs(ratio_speed),motor_1);
         thread motor_2_thread(this->drive_motor_thread_fun,motor_pin_2,-1*abs(ratio_speed),motor_2);
         motor_1_thread.join();

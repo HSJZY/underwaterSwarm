@@ -27,7 +27,9 @@ SOURCES += main.cpp\
     mpu/MPU6050.cpp \
     pid.cpp \
     test_program.cpp \
-    log.cpp
+    log.cpp \
+    udp_client.cpp \
+    line_formation_control.cpp
 
 HEADERS  += mainwindow.h \
     camera.h \
@@ -46,7 +48,9 @@ HEADERS  += mainwindow.h \
     mpu/MPU6050_6Axis_MotionApps20.h \
     pid.h \
     test_program.h \
-    log.h
+    log.h \
+    udp_client.h \
+    line_formation_control.h
 
 FORMS    += mainwindow.ui
 INCLUDEPATH += /usr/local/include\

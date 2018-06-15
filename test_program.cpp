@@ -43,3 +43,30 @@ void test_formation_alg()
     formation.line_formation_control_for_test(direction_angle,inter_distance,vec_total );
 
 }
+void test_split_string()
+{
+    string s="marker1_pos:(2,3,4).marker2_pos:None.marker3_pos:None.marker4_pos:None.marker5_pos:(1,2,3);(4,5,6).";
+    vector<string> vec_res;
+    split_string(s,vec_res,".");
+    return;
+}
+void test_udp()
+{
+    string address="192.168.1.101";
+    int port=5000;
+    udp_client udp_test(address,port);
+    string res= udp_test.start_listen();
+    cout<<"res:"<<res;
+}
+
+void test_parse_str()
+{
+    string parse_str="marker1_pos:(2,3,4).marker2_pos:None.marker3_pos:None.marker4_pos:None.marker5_pos:(1,2,3);(4,5,6).";
+    parse_agents_position(parse_str);
+}
+
+void test_line_formation()
+{
+    line_formation_control test_line_formation;
+    test_line_formation.start_line_formation();
+}

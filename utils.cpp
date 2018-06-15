@@ -22,7 +22,9 @@ void split_string(const string original_str,vector<string>& vec_strs,const strin
     }
     return;
 }
-//这代码写完不想看第二遍，去他的，能用就行，WTF！！！
+
+
+//这代码写完不想看第二遍，去tm的，能用就行，WTF！！！
 vector<vector<vector<float> > > parse_agents_position(string global_infomation)
 {
     vector<string> vec_info_markers;

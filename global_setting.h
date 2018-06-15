@@ -1,4 +1,4 @@
- #ifndef GLOBAL_SETTING_H
+#ifndef GLOBAL_SETTING_H
 #define GLOBAL_SETTING_H
 
 #define PI 3.1415926
@@ -23,12 +23,15 @@
 //定义四个摄像头的位置
 #define num_cameras 4
 #define camera_pos1 -90
-#define camera_pos2 30
+#define camera_pos2 90
 #define camera_pos3 0
 #define camera_pos4 0
 
 //定义球形机器人外壳尺寸
 #define radius_robot 80
+
+#define robot_id 1
+#define num_robots 4
 
 
 
