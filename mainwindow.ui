@@ -308,7 +308,7 @@
       <item>
        <widget class="QLineEdit" name="k_p">
         <property name="text">
-         <string>1.4</string>
+         <string>1.2</string>
         </property>
        </widget>
       </item>

@@ -11,6 +11,7 @@
 #include<string>
 #include<vector>
 #include <unistd.h>
+#include"global_setting.h"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ class udp_client
 {
 public:
     udp_client(string address,int port);
-    void start_listen();
+    string start_listen();
 private:
     struct sockaddr_in addr;
 

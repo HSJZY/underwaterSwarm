@@ -13,6 +13,7 @@
 #include"imageprocess.h"
 #include"camera.h"
 #include"test_program.h"
+#include"utils.h"
 
 #include "mainwindow.h"
 #include <QApplication>
@@ -40,6 +41,7 @@ void initMPU6050()
 {
     setup();
     delay(1000);
+    test_split_string();
     //float yaw=loop();
     //cout<<yaw;
     float lastYaw=0;
@@ -58,7 +60,7 @@ void initMPU6050()
     }
     robotStatus curCarStatue;
     curCarStatue.setInitAngleOfMPU(-lastYaw);
-    curCarStatue.setAbsAngleOfMPU(-lastYaw);
+    curCarStatue.setAbsAngleOfMPU(-lastYaw,true);
 
     std::cout<<"press any char to continue"<<std::endl;
     //cv::waitKey(0);
@@ -68,85 +70,6 @@ void initMPU6050()
     thread mpuThread(MPUThread);
     mpuThread.detach();
 }
-
-
-//void listen_motor_thread()
-//{
-//    robotStatus listen_robot_status;
-
-//    struct timeval timerBreakStart,timerBreakEnd;
-//    gettimeofday(&timerBreakStart,NULL);
-//    long int startTime1=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
-//    long int startTime2=startTime1;
-//    long int startTime3=startTime1;
-//    long int startTime4=startTime1;
-
-//    while(1)
-//    {
-//        gettimeofday(&timerBreakEnd,NULL);
-//        long int endTime=timerBreakEnd.tv_sec*1000+timerBreakEnd.tv_usec/1000;
-
-//        float cur_motor1_speed=listen_robot_status.motor1_speed;
-//        float cur_motor2_speed=listen_robot_status.motor2_speed;
-//        float cur_motor3_speed=listen_robot_status.motor3_speed;
-//        float cur_motor4_speed=listen_robot_status.motor4_speed;
-
-//        if(cur_motor1_speed!=0.0)
-//        {
-//            listen_robot_status.set_if_motor_is_sleep(motor1_pin,false);
-//        }
-//        else
-//        {
-//            if(endTime-startTime1>=1000)
-//            {
-//                listen_robot_status.set_if_motor_is_sleep(motor1_pin,true);
-//                startTime1=endTime;
-//            }
-//        }
-
-//        if(cur_motor2_speed!=0.0)
-//        {
-//            listen_robot_status.set_if_motor_is_sleep(motor2_pin,false);
-//        }
-//        else
-//        {
-//            if(endTime-startTime2>=1000)
-//            {
-//                listen_robot_status.set_if_motor_is_sleep(motor2_pin,true);
-//                startTime2=endTime;
-//            }
-//        }
-
-//        if(cur_motor3_speed!=0.0)
-//        {
-//            listen_robot_status.set_if_motor_is_sleep(motor3_pin,false);
-//        }
-//        else
-//        {
-//            if(endTime-startTime3>=1000)
-//            {
-//                listen_robot_status.set_if_motor_is_sleep(motor3_pin,true);
-//                startTime3=endTime;
-//            }
-//        }
-
-//        if(cur_motor4_speed!=0.0)
-//        {
-//            listen_robot_status.set_if_motor_is_sleep(motor4_pin,false);
-//        }
-//        else
-//        {
-//            if(endTime-startTime4>=1000)
-//            {
-//                listen_robot_status.set_if_motor_is_sleep(motor4_pin,true);
-//                startTime1=endTime;
-//            }
-//        }
-
-
-//    }
-//
-//}
 
 void listen_motor()
 {
@@ -189,8 +112,6 @@ void test_camera(int ID,int num_pictures)
     camera1.OpenCamera();
     for(int i=0;;i++)
     {
-//
-
         Mat frame=camera1.CapturePicture();
 //        break;
 //        if(!frame)break;
@@ -202,15 +123,50 @@ void test_camera(int ID,int num_pictures)
     }
     camera1.CloseCamera();
 }
+void update_postion_thread(string addr,int port)
+{
+    udp_client udp_listener(addr,port);
+    robotStatus cur_robot_status;
+    while(1)
+    {
+        string recv_formation=udp_listener.start_listen();
+        if(recv_formation=="")
+        {
+            std::cerr<<"connenction error";
+        }
+        vector<vector<vector<float> > > vec_agents_position=parse_agents_position(recv_formation);
+        cur_robot_status.set_agents_position(vec_agents_position);
+        delay(100);
+    }
+}
+
+void init_robot_status()
+{
+    robotStatus cur_robot_status;
+    cur_robot_status.setKp(1.2);
+    cur_robot_status.setKi(0);
+    cur_robot_status.setKd(0.1);
+
+    string addr="192.168.1.101";
+    int port=5000;
+    thread agents_postion_listen_thread(update_postion_thread,addr,port);
+    agents_postion_listen_thread.detach();
+}
 
 int main(int argc, char *argv[])
 {
     wiringPiSetup();
-    test_pnp();
+    init_robot_status();
+    test_line_formation();
+//    test_pnp();
+//    test_udp();
+//    test_parse_str();
+
+    initMPU6050();
 //    test_formation_alg();
 
 //    motor_c motor1;
-//    initMPU6050();
+
 //    test_camera(0,300);
 
     ledLattice dianzhen;
@@ -222,26 +178,30 @@ int main(int argc, char *argv[])
     return a.exec();
 
 
-    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/test_1.jpg"); //读入图片
-    imageProcess img_process;
-    Mat res_frame;
-    vector<vector<float> > res= img_process.getDistanceFromImage(frame0,res_frame);
+//    Mat frame0=imread("/home/pi/Desktop/underwaterSwarm/images/test_1.jpg"); //读入图片
+//    imageProcess img_process;
+//    Mat res_frame;
+//    vector<vector<float> > res= img_process.getDistanceFromImage(frame0,res_frame);
+
+
 //    Point2f
 //    [215.712, 157.464]
 //    [144.451, 88.5008]
 //    [211.979, 18.7217]
 //    [283.241, 87.6846]
-    kinematicControl kineTest;
+
+//    kinematicControl kineTest;
+
 //    kineTest.MoveLateral(0,right_side,0.4,1);
 //      kineTest.SelfRotate(-60);
-    kineTest.motor_setup();
-    while(1)
-    {
-        kineTest.MoveForward(0,0.1,100000);
-        kineTest.switchMode();
-//        kineTest.MoveForward(120,0.4,10000);
+//    kineTest.motor_setup();
+//    while(1)
+//    {
+//        kineTest.MoveForward(0,0.1,100000);
 //        kineTest.switchMode();
-    }
+// //        kineTest.MoveForward(120,0.4,10000);
+// //        kineTest.switchMode();
+//    }
 
     /*motor_c motor1,motor2,motor3,motor4;
     motor1.motor_setup();

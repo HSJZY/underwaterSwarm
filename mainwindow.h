@@ -26,7 +26,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
 private:
     void static capture_thread(camera obj_camera,int i,Mat& frame);
 //    void static formation_thread_fun(float ratio_angle,float ratio_distance);
