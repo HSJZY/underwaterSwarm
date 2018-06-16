@@ -21,7 +21,7 @@ private:
 
         int min_speed_anticlockwise=1390;
         int max_speed_anticlockwise=1290;
-        int min_speed_clockwise=1430;
+        int min_speed_clockwise=1420;
         int max_speed_clockwise=1540;
 public:
     motor_c();
@@ -67,10 +67,10 @@ public:
 //    void TurnoffMotor();
 //    void DirveAtSpeed(float speed);
 
-////    void motor1_c(int speed);
-////    void motor2_c(int speed);
-////        void motor3_c(int speed);
-////        void motor4_c(int speed);
+// //    void motor1_c(int speed);
+// //    void motor2_c(int speed);
+// //        void motor3_c(int speed);
+// //        void motor4_c(int speed);
 //};
 
 #endif // MOTOR_H

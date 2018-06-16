@@ -16,10 +16,12 @@ bool robotStatus::motor4_is_sleep;
 
 bool robotStatus::formation_stop;
 
+vector<vector<vector<float> > > robotStatus::vec_agents_postion;
 vector<Mat> robotStatus::vec_cur_frames;
 
 robotStatus::robotStatus()
 {
+
 }
 
 
@@ -61,6 +63,47 @@ void robotStatus::set_if_motor_is_sleep(int motor_pin, bool is_sleep)
     return;
 }
 
+void robotStatus::listen_motors()
+{
+    robotStatus cur_robot_status;
+    while(1)
+    {
+        if(cur_robot_status.motor1_speed==0)
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor1_pin,true);
+        }
+        else
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor1_pin,false);
+        }
+        if(cur_robot_status.motor2_speed==0)
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor2_pin,true);
+        }
+        else
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor2_pin,false);
+        }
+        if(cur_robot_status.motor3_speed==0)
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor3_pin,true);
+        }
+        else
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor3_pin,false);
+        }
+        if(cur_robot_status.motor4_speed==0)
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor4_pin,true);
+        }
+        else
+        {
+            cur_robot_status.set_if_motor_is_sleep(motor4_pin,false);
+        }
+        delay(50);
+    }
+}
+
 bool robotStatus::get_if_motor_is_sleep(int motor_pin)
 {
     switch (motor_pin) {
@@ -100,11 +143,11 @@ void robotStatus::setInitAngleOfMPU(float angle)
     this->m_initAngleOfMPU=angle;
 }
 
-void robotStatus::setAbsAngleOfMPU(float angle)
+void robotStatus::setAbsAngleOfMPU(float angle,bool is_setup)
 {
-    //简单去噪
-    if(abs(angle-this->m_absAngleOfMPU)>90)
-        angle=this->m_absAngleOfMPU;
+//    //简单去噪
+//    if(abs(angle-this->m_absAngleOfMPU)>80&&is_setup==false)
+//        angle=this->m_absAngleOfMPU;
     this->m_absAngleOfMPU=angle;
     float curAngleOfMPU=angle-m_initAngleOfMPU;
     if(curAngleOfMPU>180)
@@ -132,4 +175,19 @@ vector<Mat> robotStatus::get_cur_frames()
 void robotStatus::set_cur_frames(vector<Mat> vec_frames)
 {
     this->vec_cur_frames=vec_frames;
+}
+
+//更新全局位置信息
+void robotStatus::update_agents_postion()
+{
+    
+}
+
+void robotStatus::set_agents_position(vector<vector<vector<float> > > agents_postion)
+{
+    this->vec_agents_postion=agents_postion;
+}
+vector<vector<vector<float> > > robotStatus::get_agents_position()
+{
+    return this->vec_agents_postion;
 }

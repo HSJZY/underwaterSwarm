@@ -133,11 +133,14 @@ void update_postion_thread(string addr,int port)
         if(recv_formation=="")
         {
             std::cerr<<"connenction error";
+            continue;
         }
         vector<vector<vector<float> > > vec_agents_position=parse_agents_position(recv_formation);
         cur_robot_status.set_agents_position(vec_agents_position);
-        delay(100);
+        delay(10);
     }
+    //哈，这一句的监听是我额外加的和函数名无关，图方便
+    cur_robot_status.listen_motors();
 }
 
 void init_robot_status()
@@ -147,8 +150,14 @@ void init_robot_status()
     cur_robot_status.setKi(0);
     cur_robot_status.setKd(0.1);
 
-    string addr="192.168.1.101";
+    string addr="192.168.1.100";
     int port=5000;
+    udp_client udp_test(addr,port);
+    udp_test.start_listen();
+    string recv_formation=udp_test.start_listen();
+    vector<vector<vector<float> > > vec_agents_position=parse_agents_position(recv_formation);
+    cur_robot_status.set_agents_position(vec_agents_position);
+
     thread agents_postion_listen_thread(update_postion_thread,addr,port);
     agents_postion_listen_thread.detach();
 }
@@ -157,6 +166,9 @@ int main(int argc, char *argv[])
 {
     wiringPiSetup();
     init_robot_status();
+    delay(100);
+//    float ax=atan2(10,-10);
+//    cout<<"atan2(10,-10)"<<ax;
     test_line_formation();
 //    test_pnp();
 //    test_udp();

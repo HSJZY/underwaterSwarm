@@ -2,12 +2,20 @@
 
 line_formation_control::line_formation_control()
 {
-    
+    this->m_direction_angle=0;
+    this->m_inter_distance=700;
+}
+line_formation_control::line_formation_control(float direction,float inter_distance)
+{
+    this->m_direction_angle=direction;
+    this->m_inter_distance=inter_distance;
 }
 
 void line_formation_control::start_line_formation()
 {
     robotStatus cur_robot_statue;
+    kinematicControl kine_control;
+    struct Robot_PID first_pid=kine_control.get_first_pid();
     while(1)
     {
         if (cur_robot_statue.get_formation_is_stop_state()==true)break;
@@ -24,20 +32,9 @@ void line_formation_control::start_line_formation()
         }
         vector<vector<float> > agents_relative_self_2D=calc_relative_pos(agents_position,agents_position[robot_id-1]);
         vector<vector<float> > agents_dist_ang=convert_2D_dist_ang(agents_relative_self_2D);
+        vector<vector<float>> neighbor_2_agents=choose_nearest_two_neighbors_line(agents_dist_ang,this->m_direction_angle);
+        vector<float> target_dist_ang=calc_target_dist_direction(neighbor_2_agents);
         cout<<"pause...";
-
-
-
-//        self_rotate_to_direction(direction_angle);
-//        vector<vector<float>> total_dis_ang;
-//        total_dis_ang=calc_displacement(grab_pictures());
-//        vector<vector<float>> agents_both_sides=choose_nearest_two_neighbors_line(total_dis_ang,direction_angle);
-
-//        if(!agents_both_sides[0].empty()||!agents_both_sides[1].empty())
-//        {
-//            neighbor2Log(agents_both_sides);
-//        }
-//        start_move_line(agents_both_sides,direction_angle,inter_distance);
     }
 }
 
@@ -193,8 +190,34 @@ vector<vector<float> > line_formation_control::convert_2D_dist_ang(vector<vector
     vector<vector<float> > vec_2D_dist_ang;
     for(int i=0;i<relative_pos.size();i++)
     {
+        // remove it_self
+        if(i==robot_id-1)
+            continue;
         vector<float> single_dist_ang;
         float angle=atan2(relative_pos[i][1],relative_pos[i][0]);
+        if(angle>=0 && angle<=90/180.0*PI)
+        {
+            if(relative_pos[i][0]>=0)
+            {
+                angle=-(PI/2.0-angle);
+            }
+            else
+            {
+                angle=PI/2.0+angle;
+            }
+        }
+        else
+        {
+            if(relative_pos[i][0]<=0)
+            {
+                angle=angle-PI/2.0;
+            }
+            else
+            {
+                angle=angle-PI;
+            }
+        }
+
         float distance=sqrt(pow(relative_pos[i][0],2)+pow(relative_pos[i][1],2));
         single_dist_ang.push_back(distance);
         single_dist_ang.push_back(angle);
@@ -213,16 +236,17 @@ vector<vector<float>> line_formation_control::choose_nearest_two_neighbors_line(
     float nearest_left_x=1000000000;
     float nearest_right_x=1000000000;
     robotStatus cur_robot_status;
-    float cur_yaw=cur_robot_status.getCurAngleOfMPU();
+//    float cur_yaw=cur_robot_status.getCurAngleOfMPU();
 
     for(int i=0;i<vec_total_dis_angle.size();i++)
     {
         float cur_distance=vec_total_dis_angle[i][0];
+        float cur_angle_org=vec_total_dis_angle[i][1];
         //给定指定方向，计算当前点相对于给定方向的角度
-        float cur_angle=vec_total_dis_angle[i][1]+(cur_yaw-direction_angle)/180.0*PI;
+        float cur_angle=cur_angle_org+(-direction_angle)/180.0*PI;
         //以下cur_x代表垂直于给定方位上的分量，cur_y代表给定方向上的分量
-        float cur_x=cur_distance*sin(cur_angle);
-        float cur_y=cur_distance*cos(cur_angle);
+        float cur_x=-cur_distance*sin(cur_angle);
+//        float cur_y=cur_distance*cos(cur_angle);
         if(cur_angle>0)
         {
             //此时是在左边的情况
@@ -232,12 +256,12 @@ vector<vector<float>> line_formation_control::choose_nearest_two_neighbors_line(
                 if(nearest_left.size()==2)
                 {
                     nearest_left[0]=cur_distance;
-                    nearest_left[1]=cur_angle;
+                    nearest_left[1]=cur_angle_org;
                 }
                 else
                 {
                     nearest_left.push_back(cur_distance);
-                    nearest_left.push_back(cur_angle);
+                    nearest_left.push_back(cur_angle_org);
                 }
             }
         }
@@ -250,12 +274,12 @@ vector<vector<float>> line_formation_control::choose_nearest_two_neighbors_line(
                 if(nearest_right.size()==2)
                 {
                     nearest_right[0]=cur_distance;
-                    nearest_right[1]=cur_angle;
+                    nearest_right[1]=cur_angle_org;
                 }
                 else
                 {
                     nearest_right.push_back(cur_distance);
-                    nearest_right.push_back(cur_angle);
+                    nearest_right.push_back(cur_angle_org);
                 }
             }
         }
@@ -263,4 +287,162 @@ vector<vector<float>> line_formation_control::choose_nearest_two_neighbors_line(
     both.push_back(nearest_left);
     both.push_back(nearest_right);
     return both;
+}
+
+vector<float> line_formation_control::calc_target_dist_direction(vector<vector<float> > two_nearby)
+{
+    float move_x,move_y;
+    vector<float> nearest_left=two_nearby[0];
+    vector<float> nearest_right=two_nearby[1];
+    vector<float> target_dist_ang;
+
+//    nearest_right[0]=876.920105;
+//    nearest_right[1]=-1.344329;
+
+    if(nearest_left.empty()&&nearest_right.empty())
+    {
+        //此时该机器人属于失联状态
+        return target_dist_ang;
+    }
+    else if(nearest_left.empty())
+    {
+        //此时机器人在最左侧，切换下坐标系，以其右边机器人为原点
+        float self_x=-nearest_right[0]*sin(abs(nearest_right[1]));
+        float self_y=-nearest_right[0]*cos(nearest_right[1]);
+        float target_x=-(this->m_inter_distance)*cos(this->m_direction_angle);
+        float target_y=(this->m_inter_distance)*sin(-this->m_direction_angle);
+        move_x=target_x-self_x;
+        move_y=target_y-self_y;
+    }
+    else if(nearest_right.empty())
+    {
+        //此时机器人在最右侧,切换下坐标系，以其右边机器人为原点
+        float self_x=nearest_left[0]*sin(nearest_left[1]);
+        float self_y=-nearest_left[0]*cos(nearest_left[1]);
+        float target_x=this->m_inter_distance*cos(this->m_direction_angle);
+        float target_y=this->m_inter_distance*sin(this->m_direction_angle);
+        move_x=target_x-self_x;
+        move_y=target_y-self_y;
+    }
+    else
+    {
+        //此时机器人两侧都有邻近机器人,以自身为坐标系
+        float target_x=(nearest_right[0]*abs(sin(nearest_right[1]))-nearest_left[0]*sin(nearest_left[1]))/2;
+        float target_y=(nearest_left[0]*cos(nearest_left[1])+nearest_right[0]*cos(nearest_right[1]))/2.0;
+        move_x=target_x;
+        move_y=target_y;
+    }
+    float target_dist=sqrt(pow(move_x,2)+pow(move_y,2));
+    float target_ang=atan2(move_y,move_x);
+    if(move_x>0&&move_y>0)
+    {
+        //第一象限
+        target_ang=target_ang-1/2.0*PI;
+    }
+    else if(move_x>0&&move_y<0)
+    {
+        //第四象限
+        target_ang=target_ang-PI/2;
+    }
+    else if(move_x<0&&move_y>0)
+    {
+        //第二象限
+        target_ang=target_ang-PI/2;
+    }
+    else
+    {
+        //第三象限
+        target_ang=3*PI/2+target_ang;
+    }
+
+    target_dist_ang.push_back(target_dist);
+    target_dist_ang.push_back(target_ang);
+    return target_dist_ang;
+}
+
+void line_formation_control::start_moving(vector<float> target_dist_ang,struct Robot_PID& successed_pid,int& last_drive_side)
+{
+    kinematicControl kine_control;
+    float target_distance=target_dist_ang[0];
+    float target_angle=target_dist_ang[1];
+    robotStatus cur_robot_status;
+
+    if(target_distance<=50)
+    {
+        return;
+    }
+    int move_side;
+    if(target_angle<-PI/4 &&target_angle>=-PI*3/4)
+    {
+        move_side=right_side;
+    }
+    else if(target_angle>=-PI/4 && target_angle<=PI/4)
+    {
+        move_side=forward_side;
+    }
+    else if(target_angle>PI/4&&target_angle<3*PI/4)
+    {
+        move_side=left_side;
+    }
+    else
+    {
+        move_side=backward_side;
+    }
+
+    float move_ratio_speed=std::min(target_distance,float(1000))/1000*0.5;
+    float move_angle;
+
+    if(last_drive_side!=move_side)
+    {
+        motor_c motor;
+        switch (move_side) {
+        case left_side:
+            if(cur_robot_status.get_if_motor_is_sleep(motor3_pin))
+                motor.single_motor_setup(motor3_pin);
+            if(cur_robot_status.get_if_motor_is_sleep(motor4_pin))
+                motor.single_motor_setup(motor4_pin);
+            break;
+        case right_side:
+            if(cur_robot_status.get_if_motor_is_sleep(motor1_pin))
+                motor.single_motor_setup(motor1_pin);
+            if(cur_robot_status.get_if_motor_is_sleep(motor2_pin))
+                motor.single_motor_setup(motor2_pin);
+            break;
+        case forward_side:
+            if(cur_robot_status.get_if_motor_is_sleep(motor1_pin))
+                motor.single_motor_setup(motor1_pin);
+            if(cur_robot_status.get_if_motor_is_sleep(motor3_pin))
+                motor.single_motor_setup(motor3_pin);
+            break;
+        case backward_side:
+            if(cur_robot_status.get_if_motor_is_sleep(motor2_pin))
+                motor.single_motor_setup(motor2_pin);
+            if(cur_robot_status.get_if_motor_is_sleep(motor4_pin))
+                motor.single_motor_setup(motor4_pin);
+            break;
+        default:
+            break;
+        }
+    }
+
+    switch (move_side) {
+    case left_side:
+        move_angle=target_angle-PI/2;
+        successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,101,successed_pid);
+        break;
+    case right_side:
+        move_angle=target_angle+PI/2;
+        successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,101,successed_pid);
+        break;
+    case forward_side:
+        successed_pid=kine_control.MoveForward(target_angle,move_ratio_speed,101,successed_pid);
+        break;
+    case backward_side:
+        successed_pid=kine_control.MoveForward(target_angle,move_ratio_speed,101,successed_pid);
+        break;
+    default:
+        break;
+    }
+    last_drive_side=move_side;
+
 }

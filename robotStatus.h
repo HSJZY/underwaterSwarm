@@ -5,6 +5,8 @@
 #include<vector>
 #include<opencv2/opencv.hpp>
 #include"global_setting.h"
+#include<thread>
+#include<wiringPi.h>
 
 using namespace std;
 using namespace cv;
@@ -14,7 +16,7 @@ class robotStatus
 public:
     robotStatus();
     void setInitAngleOfMPU(float angle);
-    void setAbsAngleOfMPU(float angle);
+    void setAbsAngleOfMPU(float angle,bool is_setup=false);
     float getCurAngleOfMPU();
 
     void setZeroToAllMotor();
@@ -29,6 +31,11 @@ public:
 
     void set_cur_frames(vector<Mat> vec_frames);
     vector<Mat> get_cur_frames();
+    void  update_agents_postion();
+
+    void set_agents_position(vector<vector<vector<float> > > agents_position);
+    vector<vector<vector<float> > > get_agents_position();
+    void static listen_motors();
 
 public:
     static float motor1_speed;
@@ -51,6 +58,8 @@ private:
     static bool motor2_is_sleep;
     static bool motor3_is_sleep;
     static bool motor4_is_sleep;
+
+    static vector<vector<vector<float> > > vec_agents_postion;
 
     static vector<Mat> vec_cur_frames;
 };
