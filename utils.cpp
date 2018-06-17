@@ -31,7 +31,10 @@ vector<vector<vector<float> > > parse_agents_position(string global_infomation)
 
     vector<vector<vector<float> > > agents_position;
 
-    split_string(global_infomation,vec_info_markers,".");
+    if(global_infomation=="")
+        return agents_position;
+
+    split_string(global_infomation,vec_info_markers,"|");
     for(int i=0;i<vec_info_markers.size();i++)
     {
         string marker_i_info=vec_info_markers[i];//这里得到的结果是string 类型的marker_i:(1,2,3),(4,5,6)

@@ -16,6 +16,7 @@ void line_formation_control::start_line_formation()
     robotStatus cur_robot_statue;
     kinematicControl kine_control;
     struct Robot_PID first_pid=kine_control.get_first_pid();
+    int last_drive_side=5;
     while(1)
     {
         if (cur_robot_statue.get_formation_is_stop_state()==true)break;
@@ -34,6 +35,7 @@ void line_formation_control::start_line_formation()
         vector<vector<float> > agents_dist_ang=convert_2D_dist_ang(agents_relative_self_2D);
         vector<vector<float>> neighbor_2_agents=choose_nearest_two_neighbors_line(agents_dist_ang,this->m_direction_angle);
         vector<float> target_dist_ang=calc_target_dist_direction(neighbor_2_agents);
+        start_moving(target_dist_ang,first_pid,last_drive_side);
         cout<<"pause...";
     }
 }
@@ -195,26 +197,27 @@ vector<vector<float> > line_formation_control::convert_2D_dist_ang(vector<vector
             continue;
         vector<float> single_dist_ang;
         float angle=atan2(relative_pos[i][1],relative_pos[i][0]);
-        if(angle>=0 && angle<=90/180.0*PI)
+        if(angle>=0 && angle<=PI)
         {
-            if(relative_pos[i][0]>=0)
-            {
-                angle=-(PI/2.0-angle);
-            }
-            else
-            {
-                angle=PI/2.0+angle;
-            }
+            angle=angle-PI/2.0;
+//            if(relative_pos[i][0]>=0)
+//            {
+//                angle=-(PI/2.0-angle);
+//            }
+//            else
+//            {
+//                angle=-PI/2.0+angle;
+//            }
         }
         else
         {
             if(relative_pos[i][0]<=0)
             {
-                angle=angle-PI/2.0;
+                angle=angle+3*PI/2.0;
             }
             else
             {
-                angle=angle-PI;
+                angle=angle-PI/2;
             }
         }
 
@@ -364,23 +367,26 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
 {
     kinematicControl kine_control;
     float target_distance=target_dist_ang[0];
-    float target_angle=target_dist_ang[1];
+    float target_angle=target_dist_ang[1]*180/PI;//convert to degree
     robotStatus cur_robot_status;
 
     if(target_distance<=50)
     {
+        if(last_drive_side!=5)
+            kine_control.back_rotate_two_motor(last_drive_side,0.2,1000);
+        last_drive_side=5;
         return;
     }
     int move_side;
-    if(target_angle<-PI/4 &&target_angle>=-PI*3/4)
+    if(target_angle<-45 &&target_angle>=-135)
     {
         move_side=right_side;
     }
-    else if(target_angle>=-PI/4 && target_angle<=PI/4)
+    else if(target_angle>=-45 && target_angle<=45)
     {
         move_side=forward_side;
     }
-    else if(target_angle>PI/4&&target_angle<3*PI/4)
+    else if(target_angle>45&&target_angle<135)
     {
         move_side=left_side;
     }
@@ -427,11 +433,11 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
 
     switch (move_side) {
     case left_side:
-        move_angle=target_angle-PI/2;
+        move_angle=target_angle-90;
         successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,101,successed_pid);
         break;
     case right_side:
-        move_angle=target_angle+PI/2;
+        move_angle=target_angle+90;
         successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,101,successed_pid);
         break;
     case forward_side:

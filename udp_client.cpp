@@ -9,6 +9,7 @@ udp_client::udp_client(string address,int port)
     addr.sin_addr.s_addr = inet_addr(address.c_str());
 }
 
+
 string udp_client::start_listen()
 {
     int sockfd, len = 0;
@@ -22,7 +23,6 @@ string udp_client::start_listen()
         return nullptr;
     }
 
-//    while(1) {
     bzero(buffer, sizeof(buffer));
     printf("Please enter a string to send to server: \n");
     buffer[0]=robot_id;
@@ -32,12 +32,16 @@ string udp_client::start_listen()
     /* 将字符串传送给server端*/
     sendto(sockfd, buffer, len, 0, (struct sockaddr *)&addr, addr_len);
     /* 接收server端返回的字符串*/
+
+    timeval tv={0,10000};
+    setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO,&tv,sizeof(tv));
+
     len = recvfrom(sockfd, buffer, sizeof(buffer), 0,(struct sockaddr *)&addr, (socklen_t *)&addr_len);
-//        printf("Receive from server: %s\n", buffer);
-    string markers_pos=buffer;
+
+    string markers_pos;
+    if(len!=-1)
+    {
+        markers_pos=buffer;
+    }
     return markers_pos;
-//    cout<<"buffer:"<<buffer;
-//    }
-
-
 }
