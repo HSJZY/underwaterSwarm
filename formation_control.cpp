@@ -53,9 +53,7 @@ void formation_control::line_formation_control_for_test(float direction_angle, f
 vector<vector<float>> formation_control::calc_displacement_test(vector<vector<float>> frames)
 {
     vector<vector<float>> lattic_dis_ang;
-
     vector<vector<float>> img_displacement;
-
 
     img_displacement=frames;
     for(int j=0;j<img_displacement.size();j++)
@@ -211,8 +209,13 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     int move_lateral_side;
     kinematicControl kine_control;
 
+    struct Robot_PID last_pid=kine_control.get_first_pid();
+
     vector<float> nearest_left=both_nearest_agents[0];
     vector<float> nearest_right=both_nearest_agents[1];
+
+//    nearest_right[0]=876.920105;
+//    nearest_right[1]=-1.344329;
 
     float middle_x=0;
     float middle_y=0;
@@ -234,24 +237,24 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
     else if(nearest_left.empty())
     {
         //此时机器人在最左侧
-        middle_x=-inter_distance+(inter_distance+abs(nearest_right[0]*sin(nearest_right[1])))/2.0;
-        middle_y=nearest_right[0]*cos(nearest_right[1]);
+        middle_x=-inter_distance+abs(nearest_right[0]*sin(nearest_right[1]));
+        middle_y=nearest_right[0]*cos(nearest_right[1])/3.0;
 //        if(middle_x>0) move_lateral_side=
 //        move_lateral_side=left_side;
     }
     else if(nearest_right.empty())
     {
         //此时机器人在最右侧
-        middle_x=inter_distance-(inter_distance+abs(nearest_left[0]*sin(nearest_left[1])))/2.0;
+        middle_x=inter_distance-abs(nearest_left[0]*sin(nearest_left[1]));
 //        middle_x=nearest_left[0]*sin(nearest_left[1])-inter_distance;
-        middle_y=nearest_left[0]*cos(nearest_left[1]);
+        middle_y=nearest_left[0]*cos(nearest_left[1])/3.0;
 //        move_lateral_side=right_side;
     }
     else
     {
         //此时机器人两侧都有邻近机器人
         middle_x=(nearest_left[0]*sin(nearest_left[1])+nearest_right[0]*sin(nearest_right[1]))/2;
-        middle_y=(nearest_left[0]*cos(nearest_left[1])+nearest_right[0]*cos(nearest_right[1]))/2;
+        middle_y=(nearest_left[0]*cos(nearest_left[1])+nearest_right[0]*cos(nearest_right[1]))/3;
     }
 
     if(middle_x<0)
@@ -267,51 +270,106 @@ void formation_control::start_move_line(vector<vector<float>> both_nearest_agent
 
     move_x=abs(middle_x);
     move_y=abs(middle_y);
+    float move_distance=sqrt(move_x*move_x+move_y*move_y);
+    float kp_1=4;
+    float ratio_speed=0.12;
+    float move_time=5000*(move_distance/1000*kp_1);
 
-    //插补的方式进行运动，先横向，后纵向
-    float kp_1=4,kp_2=2;
-    float ratio_speed=0.25;
-    float move_lateral_time=3000*(move_x/1000*kp_1);
-    float move_forward_time=1000*(move_y/1000*kp_2);
-
-//    bool is_moved=false;
-    //此处设定一个阈值为80mm，80mm之内不进行移动
-    if(move_x>80)
+    float rotate_theta=atan2(middle_y,middle_x)*180/PI;
+    if(rotate_theta>90) rotate_theta=rotate_theta-180;
+    if(abs(rotate_theta)<45)
     {
-            kine_control.switchMode();
-            kine_control.MoveLateral(direction_angle,move_lateral_side,ratio_speed,move_lateral_time);
-            float back_time=std::min(move_lateral_time/5.0,double(1000));
-            kine_control.back_rotate_two_motor(move_lateral_side,ratio_speed,back_time);
-//            is_moved==true;
-    }
-    if(move_y<50)
-    {
-        return;
+        //此时该横向走
+        kine_control.switchMode();
+        kine_control.MoveLateral(rotate_theta,move_lateral_side,ratio_speed,move_time,last_pid);
+        kine_control.back_rotate_two_motor(move_lateral_side,2*ratio_speed,1000);
     }
     else
     {
+        //此时该纵向走
+        kine_control.switchMode();
+        float forward_angle;
+        int back_side;
         if(middle_y>0)
         {
-            kine_control.switchMode();
-            kine_control.MoveForward(direction_angle,ratio_speed,move_forward_time);
-            float back_time=std::min(move_forward_time/5.0,double(1000));
-            kine_control.back_rotate_two_motor(forward_side,ratio_speed,back_time);
+            //此时该往前走
+            if(middle_x>0)
+            {
+                //此时在第一象限
+                forward_angle=abs(rotate_theta)-90;
+            }
+            else
+            {
+                //此时在第二象限
+                forward_angle=90-abs(rotate_theta);
+            }
+            back_side=forward_side;
         }
         else
         {
-            float move_angle=direction_angle+180;
-            if(move_angle>180)
+            //此时该往后走
+            if(middle_x>0)
             {
-                move_angle-=360;
+                //此时在第三象限
+                forward_angle=90+abs(rotate_theta);
             }
-            kine_control.switchMode();
-            kine_control.MoveForward(move_angle,ratio_speed,move_forward_time);
-            float back_time=std::min(move_forward_time/5.0,double(1000));
-            kine_control.back_rotate_two_motor(backward_side,ratio_speed,back_time);
-
+            else
+            {
+                //此时在第四象限
+                forward_angle=360-abs(rotate_theta);
+            }
+            back_side=backward_side;
         }
+        kine_control.MoveForward(forward_angle,ratio_speed,move_time,last_pid);
+        kine_control.back_rotate_two_motor(back_side,2*ratio_speed,1000);
     }
+
+//    //插补的方式进行运动，先横向，后纵向
+//    float kp_1=4,kp_2=2;
+//    float ratio_speed=0.2;
+//    float move_lateral_time=5000*(move_x/1000*kp_1);
+//    float move_forward_time=2000*(move_y/1000*kp_2);
+
+// //    bool is_moved=false;
+//    //此处设定一个阈值为80mm，80mm之内不进行移动
+//    if(move_x>80)
+//    {
+//            kine_control.switchMode();
+//            kine_control.MoveLateral(direction_angle,move_lateral_side,ratio_speed,move_lateral_time,last_pid);
+//            float back_time=std::min(move_lateral_time/5.0,double(1000));
+//            kine_control.back_rotate_two_motor(move_lateral_side,ratio_speed,back_time);
+// //            is_moved==true;
+//    }
+//    if(move_y<50)
+//    {
+//        return;
+//    }
+//    else
+//    {
+//        if(middle_y>0)
+//        {
+//            kine_control.switchMode();
+//            kine_control.MoveForward(direction_angle,ratio_speed,move_forward_time,last_pid);
+//            float back_time=std::min(move_forward_time/5.0,double(1000));
+//            kine_control.back_rotate_two_motor(forward_side,ratio_speed,back_time);
+//        }
+//        else
+//        {
+//            float move_angle=direction_angle+180;
+//            if(move_angle>180)
+//            {
+//                move_angle-=360;
+//            }
+//            kine_control.switchMode();
+//            kine_control.MoveForward(move_angle,ratio_speed,move_forward_time,last_pid);
+//            float back_time=std::min(move_forward_time/5.0,double(1000));
+//            kine_control.back_rotate_two_motor(backward_side,ratio_speed,back_time);
+
+//        }
+//    }
 }
+
+
 
 void formation_control::neighbor2Log(vector<vector<float>> both_nearest_agents)
 {

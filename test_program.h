@@ -20,4 +20,6 @@ void test_split_string();
 void test_line_formation();
 void test_parse_str();
 void test_potential_field_two_points();
+
+void test_rep_potential_field_line_formation();
 #endif // TEST_PROGRAM_H

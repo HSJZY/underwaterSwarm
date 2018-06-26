@@ -41,7 +41,7 @@ void initMPU6050()
 {
     setup();
     delay(1000);
-    test_split_string();
+//    test_split_string();
     //float yaw=loop();
     //cout<<yaw;
     float lastYaw=0;
@@ -160,12 +160,11 @@ void init_robot_status()
 int main(int argc, char *argv[])
 {
     wiringPiSetup();
-    init_robot_status();
-//    delay(100);
-//    float ax=atan2(10,-10);
-//    cout<<"atan2(10,-10)"<<ax;
-    test_potential_field_two_points();
-    test_line_formation();
+//    init_robot_status();
+
+//    test_potential_field_two_points();
+//    test_rep_potential_field_line_formation();
+//    test_line_formation();
 //    test_pnp();
 //    test_udp();
 //    test_parse_str();
