@@ -78,9 +78,6 @@ void listen_motor()
     listen_robot_status.set_if_motor_is_sleep(motor2_pin,true);
     listen_robot_status.set_if_motor_is_sleep(motor3_pin,true);
     listen_robot_status.set_if_motor_is_sleep(motor4_pin,true);
-
-//    thread listen_motor_thread(&listen_motor_thread);
-//    listen_motor_thread.detach();
 }
 
 void drive_motor_11(int motor_id,float speed,motor_c motor_1)
@@ -88,11 +85,9 @@ void drive_motor_11(int motor_id,float speed,motor_c motor_1)
         switch (motor_id) {
         case 1:
             motor_1.drive_motor(motor1_pin,motor1_clockwise_multi,speed);
-//            motor_1.motor1_c(speed);
             break;
         case 2:
             motor_1.drive_motor(motor2_pin,motor2_clockwise_multi,speed);
-//            motor_1.motor2_c(speed);
             break;
         case 3:
             motor_1.drive_motor(motor3_pin,motor3_clockwise_multi,speed);
@@ -139,7 +134,7 @@ void update_postion_thread(string addr,int port)
         cur_robot_status.set_agents_position(vec_agents_position);
         delay(10);
     }
-    //哈，这一句的监听是我额外加的和函数名无关，图方便
+    //哈，这一句的监听是我额外加的,和函数名无关，图方便
     cur_robot_status.listen_motors();
 }
 
@@ -150,7 +145,7 @@ void init_robot_status()
     cur_robot_status.setKi(0);
     cur_robot_status.setKd(0.1);
 
-    string addr="192.168.1.100";
+    string addr="192.168.1.104";
     int port=5000;
     udp_client udp_test(addr,port);
     udp_test.start_listen();
@@ -166,9 +161,10 @@ int main(int argc, char *argv[])
 {
     wiringPiSetup();
     init_robot_status();
-    delay(100);
+//    delay(100);
 //    float ax=atan2(10,-10);
 //    cout<<"atan2(10,-10)"<<ax;
+    test_potential_field_two_points();
     test_line_formation();
 //    test_pnp();
 //    test_udp();

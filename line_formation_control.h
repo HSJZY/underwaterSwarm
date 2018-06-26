@@ -7,6 +7,7 @@
 #include<robotStatus.h>
 #include<algorithm>
 #include<math.h>
+#include"utils.h"
 #include"kinematiccontrol.h"
 #include"motor.h"
 
@@ -29,6 +30,8 @@ private:
     vector<vector<float> > choose_nearest_two_neighbors_line(vector<vector<float> > vec_total_dis_angle,float direction_angle);
     vector<float> calc_target_dist_direction(vector<vector<float> > two_nearby);
     void start_moving(vector<float> target_dist_ang,struct Robot_PID& successed_pid,int& last_drive_mode);
+
+    vector<float> artifical_potential_rep_field(vector<vector<float>> boundary,vector<float> self_position,bool is_boundary=false);
 
 private:
     float m_direction_angle;

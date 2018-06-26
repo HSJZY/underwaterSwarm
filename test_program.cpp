@@ -70,3 +70,12 @@ void test_line_formation()
     line_formation_control test_line_formation;
     test_line_formation.start_line_formation();
 }
+
+void test_potential_field_two_points()
+{
+    float in_range=200;
+    vector<float> self={100,100};
+    vector<float> obstacle={0,0};
+    potential_field_two_point(self,obstacle,in_range);
+
+}

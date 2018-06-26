@@ -200,14 +200,6 @@ vector<vector<float> > line_formation_control::convert_2D_dist_ang(vector<vector
         if(angle>=0 && angle<=PI)
         {
             angle=angle-PI/2.0;
-//            if(relative_pos[i][0]>=0)
-//            {
-//                angle=-(PI/2.0-angle);
-//            }
-//            else
-//            {
-//                angle=-PI/2.0+angle;
-//            }
         }
         else
         {
@@ -450,5 +442,62 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
         break;
     }
     last_drive_side=move_side;
+}
 
+vector<float> line_formation_control::artifical_potential_rep_field(vector<vector<float> > environment,vector<float> self_position,bool is_boundary)
+{
+//    vector<vector<float> > relative_env=calc_relative_pos(environment,self_position);
+
+    if(is_boundary)
+    {
+        if(environment.size()==1)
+        {
+            vector<float> buttom={self_position[0],environment[0][1]};
+            vector<float> left={environment[0][0],self_position[1]};
+            vector<float> buttom_force=potential_field_two_point(self_position,buttom,300);
+            vector<float> left_force=potential_field_two_point(self_position,left,300);
+            vector<float> combine={buttom_force[0]+left_force[1],buttom_force[1]+left_force[1]};
+            return combine;
+        }
+        else if(environment.size()==2)
+        {
+            vector<float> buttom={self_position[0],environment[0][1]};
+            vector<float> left={environment[0][0],self_position[1]};
+            vector<float> right={environment[1][0],self_position[1]};
+            vector<float> buttom_force=potential_field_two_point(self_position,buttom,300);
+            vector<float> left_force=potential_field_two_point(self_position,left,300);
+            vector<float> right_force=potential_field_two_point(self_position,right,300);
+            vector<float> combine={buttom_force[0]+left_force[0]+right_force[0],buttom_force[1]+left_force[1]+right_force[1]};
+            return combine;
+        }
+        else if(environment.size()>=3)
+        {
+            vector<float> buttom={self_position[0],environment[0][1]};
+            vector<float> left={environment[0][0],self_position[1]};
+            vector<float> right={environment[1][0],self_position[1]};
+            vector<float> top={self_position[0],environment[2][1]};
+            vector<float> buttom_force=potential_field_two_point(self_position,buttom,300);
+            vector<float> left_force=potential_field_two_point(self_position,left,300);
+            vector<float> right_force=potential_field_two_point(self_position,right,300);
+            vector<float> top_force=potential_field_two_point(self_position,top,300);
+            vector<float> combine={buttom_force[0]+left_force[0]+right_force[0]+top_force[0],buttom_force[1]+left_force[1]+right_force[1]+top_force[1]};
+            return combine;
+        }
+        else
+        {
+            vector<float> combine={0,0};
+            return combine;
+        }
+    }
+    else
+    {
+        vector<float> rep_force={0,0};
+        for(int i=0;i<environment.size();i++)
+        {
+            vector<float> rep_force_i=potential_field_two_point(self_position,environment[i],500);
+            rep_force[0]+=rep_force_i[0];
+            rep_force[1]+=rep_force_i[1];
+        }
+        return rep_force;
+    }
 }

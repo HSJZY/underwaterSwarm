@@ -77,3 +77,40 @@ vector<vector<vector<float> > > parse_agents_position(string global_infomation)
 }
 
 
+vector<float> potential_field_two_point(vector<float> self, vector<float> obstacle,float in_range)
+{
+    vector<float> rep_obs_self;
+    float distance=0;
+    for(int i=0;i<self.size();i++)
+    {
+        rep_obs_self.push_back(self[i]-obstacle[i]);
+        distance+=pow(rep_obs_self[i],2);
+    }
+    distance=sqrt(distance);
+    vector<float> res;
+    if(distance>in_range)
+    {
+        res.push_back(0);
+        res.push_back(0);
+    }
+    else
+    {
+        float proportion=1000;
+        float in_range_pro=in_range/proportion;
+        float dist_pro=distance/proportion;
+        float yita=1000;
+        float rep_force=1/2.0*yita*(1/dist_pro-1/in_range_pro);
+        res.push_back(sgn(rep_obs_self[0])*pow(rep_obs_self[0],2)/pow(distance,2)*rep_force);
+        res.push_back(sgn(rep_obs_self[1])*pow(rep_obs_self[1],2)/pow(distance,2)*rep_force);
+    }
+    cout<<"pause";
+    return res;
+}
+
+int sgn(float num)
+{
+    if(num>0) return 1;
+    else if(num==0) return 0;
+    else  return -1;
+
+}
