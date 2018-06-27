@@ -145,7 +145,7 @@ void init_robot_status()
     cur_robot_status.setKi(0);
     cur_robot_status.setKd(0.1);
 
-    string addr="192.168.1.104";
+    string addr="192.168.1.109";
     int port=5000;
     udp_client udp_test(addr,port);
     udp_test.start_listen();
@@ -160,11 +160,11 @@ void init_robot_status()
 int main(int argc, char *argv[])
 {
     wiringPiSetup();
-//    init_robot_status();
+    init_robot_status();
 
 //    test_potential_field_two_points();
 //    test_rep_potential_field_line_formation();
-//    test_line_formation();
+    test_line_formation();
 //    test_pnp();
 //    test_udp();
 //    test_parse_str();

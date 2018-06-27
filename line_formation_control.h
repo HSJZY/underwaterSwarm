@@ -28,9 +28,11 @@ private:
 
     vector<vector<float> > convert_2D_dist_ang(vector<vector<float> > relative_pos);
     vector<vector<float> > choose_nearest_two_neighbors_line(vector<vector<float> > vec_total_dis_angle,float direction_angle);
-    vector<float> calc_target_dist_direction(vector<vector<float> > two_nearby);
+    vector<float> calc_target_dist_direction(vector<vector<float> > two_nearby,vector<float> rep_force);
     void start_moving(vector<float> target_dist_ang,struct Robot_PID& successed_pid,int& last_drive_mode);
-
+    vector<float> calc_rep_force(vector<vector<float> > boundary,vector<vector<float> > agents_position);
+//临时测试用
+//public:
     vector<float> artifical_potential_rep_field(vector<vector<float>> boundary,vector<float> self_position,bool is_boundary=false);
 
 private:

@@ -20,12 +20,17 @@ void line_formation_control::start_line_formation()
     while(1)
     {
         if (cur_robot_statue.get_formation_is_stop_state()==true)break;
+
         vector<vector<vector<float> > > agents_postion_3D=cur_robot_statue.get_agents_position();
+
+//        vector<vector<vector<float> > > agents_postion_3D={{{300,100,200}},{{111,100,0}},{{0,100,0},{1,100,0}}};
+
         if(agents_postion_3D.size()==0) continue;
         vector<vector<vector<float> > > agents_postion_2D=subtract_one_dim(agents_postion_3D,1);
         vector<vector<float> > boundary_sorted=calc_boundary(agents_postion_2D);
-
         vector<vector<float> > agents_position=get_agents_position(agents_postion_2D);
+
+        vector<float> rep_force=calc_rep_force(boundary_sorted,agents_position);
         if(boundary_sorted.empty())
         {
             cerr<<"检测出错啦！！！！";
@@ -34,10 +39,33 @@ void line_formation_control::start_line_formation()
         vector<vector<float> > agents_relative_self_2D=calc_relative_pos(agents_position,agents_position[robot_id-1]);
         vector<vector<float> > agents_dist_ang=convert_2D_dist_ang(agents_relative_self_2D);
         vector<vector<float>> neighbor_2_agents=choose_nearest_two_neighbors_line(agents_dist_ang,this->m_direction_angle);
-        vector<float> target_dist_ang=calc_target_dist_direction(neighbor_2_agents);
+
+        vector<float> target_dist_ang=calc_target_dist_direction(neighbor_2_agents,rep_force);
         start_moving(target_dist_ang,first_pid,last_drive_side);
         cout<<"pause...";
     }
+}
+
+vector<float> line_formation_control::calc_rep_force(vector<vector<float> > boundary, vector<vector<float> > agents_position)
+{
+    vector<vector<float> > other_agents_position;
+    vector<float> self_position=agents_position[robot_id-1];
+    for(int i=0;i<agents_position.size();i++)
+    {
+        if(i==robot_id-1)
+        {
+            continue;
+        }
+        other_agents_position.push_back(agents_position[i]);
+    }
+    vector<float> rep_force_boundary=artifical_potential_rep_field(boundary,self_position,true);
+    vector<float> rep_force_agents_between=artifical_potential_rep_field(other_agents_position,self_position);
+    vector<float> rep_force;
+    for(int i=0;i<rep_force_boundary.size();i++)
+    {
+        rep_force.push_back(rep_force_boundary[i]+rep_force_agents_between[i]);
+    }
+    return rep_force;
 }
 
 vector<vector<float> > line_formation_control::get_agents_position(vector<vector<vector<float> > > agents_postion_2D)
@@ -284,7 +312,7 @@ vector<vector<float>> line_formation_control::choose_nearest_two_neighbors_line(
     return both;
 }
 
-vector<float> line_formation_control::calc_target_dist_direction(vector<vector<float> > two_nearby)
+vector<float> line_formation_control::calc_target_dist_direction(vector<vector<float> > two_nearby,vector<float> rep_force)
 {
     float move_x,move_y;
     vector<float> nearest_left=two_nearby[0];
@@ -327,6 +355,10 @@ vector<float> line_formation_control::calc_target_dist_direction(vector<vector<f
         move_x=target_x;
         move_y=target_y;
     }
+
+    move_x+=rep_force[0];
+    move_y+=rep_force[1];
+
     float target_dist=sqrt(pow(move_x,2)+pow(move_y,2));
     float target_ang=atan2(move_y,move_x);
     if(move_x>0&&move_y>0)
@@ -446,8 +478,6 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
 
 vector<float> line_formation_control::artifical_potential_rep_field(vector<vector<float> > environment,vector<float> self_position,bool is_boundary)
 {
-//    vector<vector<float> > relative_env=calc_relative_pos(environment,self_position);
-
     if(is_boundary)
     {
         if(environment.size()==1)
@@ -494,7 +524,7 @@ vector<float> line_formation_control::artifical_potential_rep_field(vector<vecto
         vector<float> rep_force={0,0};
         for(int i=0;i<environment.size();i++)
         {
-            vector<float> rep_force_i=potential_field_two_point(self_position,environment[i],500);
+            vector<float> rep_force_i=potential_field_two_point(self_position,environment[i],600);
             rep_force[0]+=rep_force_i[0];
             rep_force[1]+=rep_force_i[1];
         }

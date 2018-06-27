@@ -86,7 +86,7 @@ void test_rep_potential_field_line_formation()
     line_formation_control line_control;
     vector<vector<float> > boundary={{0,0},{3000,0}};
     vector<float> self_pos={200,300};
-    vector<float> rep=line_control.artifical_potential_rep_field(boundary,self_pos,false);
+//    vector<float> rep=line_control.artifical_potential_rep_field(boundary,self_pos,false);
     cout<<endl;
 }
 
