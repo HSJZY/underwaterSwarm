@@ -24,6 +24,7 @@ public:
 
 private:
     struct sockaddr_in addr;
+    int sockfd;
 };
 
 #endif // UDP_CLIENT_H

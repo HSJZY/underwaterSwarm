@@ -145,16 +145,16 @@ void init_robot_status()
     cur_robot_status.setKi(0);
     cur_robot_status.setKd(0.1);
 
-    string addr="192.168.1.109";
-    int port=5000;
-    udp_client udp_test(addr,port);
-    udp_test.start_listen();
-    string recv_formation=udp_test.start_listen();
-    vector<vector<vector<float> > > vec_agents_position=parse_agents_position(recv_formation);
-    cur_robot_status.set_agents_position(vec_agents_position);
+//    string addr="192.168.1.109";
+//    int port=5000;
+//    udp_client udp_test(addr,port);
+//    udp_test.start_listen();
+//    string recv_formation=udp_test.start_listen();
+//    vector<vector<vector<float> > > vec_agents_position=parse_agents_position(recv_formation);
+//    cur_robot_status.set_agents_position(vec_agents_position);
 
-    thread agents_postion_listen_thread(update_postion_thread,addr,port);
-    agents_postion_listen_thread.detach();
+//    thread agents_postion_listen_thread(update_postion_thread,addr,port);
+//    agents_postion_listen_thread.detach();
 }
 
 int main(int argc, char *argv[])
@@ -164,12 +164,13 @@ int main(int argc, char *argv[])
 
 //    test_potential_field_two_points();
 //    test_rep_potential_field_line_formation();
-    test_line_formation();
+
 //    test_pnp();
 //    test_udp();
 //    test_parse_str();
 
     initMPU6050();
+//    test_line_formation();
 //    test_formation_alg();
 
 //    motor_c motor1;

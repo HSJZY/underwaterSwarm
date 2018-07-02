@@ -21,9 +21,9 @@ void line_formation_control::start_line_formation()
     {
         if (cur_robot_statue.get_formation_is_stop_state()==true)break;
 
-        vector<vector<vector<float> > > agents_postion_3D=cur_robot_statue.get_agents_position();
+//        vector<vector<vector<float> > > agents_postion_3D=cur_robot_statue.get_agents_position();
 
-//        vector<vector<vector<float> > > agents_postion_3D={{{300,100,200}},{{111,100,0}},{{0,100,0},{1,100,0}}};
+        vector<vector<vector<float> > > agents_postion_3D={{{300,100,200}},{{111,100,0}},{{0,100,0},{1,100,0}}};
 
         if(agents_postion_3D.size()==0) continue;
         vector<vector<vector<float> > > agents_postion_2D=subtract_one_dim(agents_postion_3D,1);
@@ -419,56 +419,57 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
         move_side=backward_side;
     }
 
-    float move_ratio_speed=std::min(target_distance,float(1000))/1000*0.5;
+    float move_ratio_speed=std::min(target_distance,float(1000))/1000*0.35;
     float move_angle;
 
     if(last_drive_side!=move_side)
     {
-        motor_c motor;
-        switch (move_side) {
-        case left_side:
-            if(cur_robot_status.get_if_motor_is_sleep(motor3_pin))
-                motor.single_motor_setup(motor3_pin);
-            if(cur_robot_status.get_if_motor_is_sleep(motor4_pin))
-                motor.single_motor_setup(motor4_pin);
-            break;
-        case right_side:
-            if(cur_robot_status.get_if_motor_is_sleep(motor1_pin))
-                motor.single_motor_setup(motor1_pin);
-            if(cur_robot_status.get_if_motor_is_sleep(motor2_pin))
-                motor.single_motor_setup(motor2_pin);
-            break;
-        case forward_side:
-            if(cur_robot_status.get_if_motor_is_sleep(motor1_pin))
-                motor.single_motor_setup(motor1_pin);
-            if(cur_robot_status.get_if_motor_is_sleep(motor3_pin))
-                motor.single_motor_setup(motor3_pin);
-            break;
-        case backward_side:
-            if(cur_robot_status.get_if_motor_is_sleep(motor2_pin))
-                motor.single_motor_setup(motor2_pin);
-            if(cur_robot_status.get_if_motor_is_sleep(motor4_pin))
-                motor.single_motor_setup(motor4_pin);
-            break;
-        default:
-            break;
-        }
+//        motor_c motor;
+        kine_control.switchMode();
+//        switch (move_side) {
+//        case left_side:
+//            if(cur_robot_status.get_if_motor_is_sleep(motor3_pin))
+//                motor.single_motor_setup(motor3_pin);
+//            if(cur_robot_status.get_if_motor_is_sleep(motor4_pin))
+//                motor.single_motor_setup(motor4_pin);
+//            break;
+//        case right_side:
+//            if(cur_robot_status.get_if_motor_is_sleep(motor1_pin))
+//                motor.single_motor_setup(motor1_pin);
+//            if(cur_robot_status.get_if_motor_is_sleep(motor2_pin))
+//                motor.single_motor_setup(motor2_pin);
+//            break;
+//        case forward_side:
+//            if(cur_robot_status.get_if_motor_is_sleep(motor1_pin))
+//                motor.single_motor_setup(motor1_pin);
+//            if(cur_robot_status.get_if_motor_is_sleep(motor3_pin))
+//                motor.single_motor_setup(motor3_pin);
+//            break;
+//        case backward_side:
+//            if(cur_robot_status.get_if_motor_is_sleep(motor2_pin))
+//                motor.single_motor_setup(motor2_pin);
+//            if(cur_robot_status.get_if_motor_is_sleep(motor4_pin))
+//                motor.single_motor_setup(motor4_pin);
+//            break;
+//        default:
+//            break;
+//        }
     }
 
     switch (move_side) {
     case left_side:
         move_angle=target_angle-90;
-        successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,101,successed_pid);
+        successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,500,successed_pid);
         break;
     case right_side:
         move_angle=target_angle+90;
-        successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,101,successed_pid);
+        successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,500,successed_pid);
         break;
     case forward_side:
-        successed_pid=kine_control.MoveForward(target_angle,move_ratio_speed,101,successed_pid);
+        successed_pid=kine_control.MoveForward(target_angle,move_ratio_speed,500,successed_pid);
         break;
     case backward_side:
-        successed_pid=kine_control.MoveForward(target_angle,move_ratio_speed,101,successed_pid);
+        successed_pid=kine_control.MoveForward(target_angle,move_ratio_speed,500,successed_pid);
         break;
     default:
         break;
