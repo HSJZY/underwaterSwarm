@@ -466,8 +466,8 @@ void/* MainWindow::*/formation_thread_fun(float ratio_angle,float ratio_distance
 {
     robotStatus cur_robot_status;
     cur_robot_status.set_formation_stop(false);
-    formation_control line_formation_control;
-    line_formation_control.line_formation_control(ratio_angle,ratio_distance);
+    line_formation_control formation_control(ratio_angle,ratio_distance);
+    formation_control.start_line_formation();
 }
 
 void MainWindow::on_btn_start_formation_clicked()

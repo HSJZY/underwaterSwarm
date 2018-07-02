@@ -170,6 +170,7 @@ int main(int argc, char *argv[])
 //    test_parse_str();
 
     initMPU6050();
+//    test_line_formation();
 //    test_formation_alg();
 
 //    motor_c motor1;

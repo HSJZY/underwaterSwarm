@@ -12,6 +12,7 @@
 #include"global_setting.h"
 #include"camera.h"
 #include"formation_control.h"
+#include"line_formation_control.h"
 using namespace cv;
 using namespace std;
 
