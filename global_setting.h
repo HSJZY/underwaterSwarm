@@ -30,7 +30,7 @@
 //定义球形机器人外壳尺寸
 #define radius_robot 80
 
-#define robot_id 1
+#define robot_id 2
 #define num_robots 4
 
 

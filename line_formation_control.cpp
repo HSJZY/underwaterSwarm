@@ -21,13 +21,13 @@ void line_formation_control::start_line_formation()
     {
         if (cur_robot_statue.get_formation_is_stop_state()==true)break;
 
-//        vector<vector<vector<float> > > agents_postion_3D=cur_robot_statue.get_agents_position();
+        vector<vector<vector<float> > > agents_postion_3D=cur_robot_statue.get_agents_position();
 
-        vector<vector<vector<float> > > agents_postion_3D={{{300,100,200}},{{111,100,0}},{{0,100,0},{1,100,0}}};
+//        vector<vector<vector<float> > > agents_postion_3D={{{300,100,200}},{{111,100,0}},{{0,100,0},{1,100,0}}};
 
         if(agents_postion_3D.size()==0) continue;
         vector<vector<vector<float> > > agents_postion_2D=subtract_one_dim(agents_postion_3D,1);
-        vector<vector<float> > boundary_sorted=calc_boundary(agents_postion_2D);
+        vector<vector<float> > boundary_sorted=agents_postion_2D[agents_postion_2D.size()-1];
         vector<vector<float> > agents_position=get_agents_position(agents_postion_2D);
 
         vector<float> rep_force=calc_rep_force(boundary_sorted,agents_position);
@@ -220,6 +220,8 @@ vector<vector<float> > line_formation_control::convert_2D_dist_ang(vector<vector
     vector<vector<float> > vec_2D_dist_ang;
     for(int i=0;i<relative_pos.size();i++)
     {
+        if(relative_pos[i].empty())
+            continue;
         // remove it_self
         if(i==robot_id-1)
             continue;
@@ -463,7 +465,7 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
         break;
     case right_side:
         move_angle=target_angle+90;
-        successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,500,successed_pid);
+        successed_pid=kine_control.MoveLateral(move_angle,right_side,move_ratio_speed,500,successed_pid);
         break;
     case forward_side:
         successed_pid=kine_control.MoveForward(target_angle,move_ratio_speed,500,successed_pid);
@@ -481,6 +483,11 @@ vector<float> line_formation_control::artifical_potential_rep_field(vector<vecto
 {
     if(is_boundary)
     {
+        if(environment.empty()==0)
+        {
+            vector<float> combine={0,0};
+            return combine;
+        }
         if(environment.size()==1)
         {
             vector<float> buttom={self_position[0],environment[0][1]};
@@ -525,6 +532,8 @@ vector<float> line_formation_control::artifical_potential_rep_field(vector<vecto
         vector<float> rep_force={0,0};
         for(int i=0;i<environment.size();i++)
         {
+            if(environment[i].empty())
+                continue;
             vector<float> rep_force_i=potential_field_two_point(self_position,environment[i],600);
             rep_force[0]+=rep_force_i[0];
             rep_force[1]+=rep_force_i[1];
