@@ -24,6 +24,25 @@ void split_string(const string original_str,vector<string>& vec_strs,const strin
 }
 
 
+void write_yaw_file(string filename)
+{
+    Log log_file;
+    string log_path="/home/pi/Desktop/underwaterSwarm/images/"+filename+".log";
+    log_file.Open(log_path);
+    robotStatus cur_robot_status;
+
+    struct timeval timerBreakStart;
+    gettimeofday(&timerBreakStart,NULL);
+    long int startTime=timerBreakStart.tv_sec*1000+timerBreakStart.tv_usec/1000;
+
+    log_file<<to_string(startTime);
+    log_file<<" ";
+    log_file<<to_string(cur_robot_status.getCurAngleOfMPU());
+    log_file<<"\n";
+    log_file.Close();
+    delay(100);
+}
+
 //这代码写完不想看第二遍，去tm的，能用就行，WTF！！！
 vector<vector<vector<float> > > parse_agents_position(string global_infomation)
 {

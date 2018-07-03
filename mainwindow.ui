@@ -125,7 +125,7 @@
        <x>60</x>
        <y>280</y>
        <width>161</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -164,7 +164,7 @@
        <x>1</x>
        <y>311</y>
        <width>221</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -294,7 +294,7 @@
        <x>0</x>
        <y>370</y>
        <width>331</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -449,7 +449,7 @@
        <x>20</x>
        <y>290</y>
        <width>341</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -508,7 +508,7 @@
        <x>10</x>
        <y>40</y>
        <width>201</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -576,7 +576,7 @@
        <x>250</x>
        <y>100</y>
        <width>121</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -605,7 +605,7 @@
        <x>250</x>
        <y>80</y>
        <width>121</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_6">
@@ -634,7 +634,7 @@
        <x>250</x>
        <y>60</y>
        <width>121</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -663,7 +663,7 @@
        <x>250</x>
        <y>40</y>
        <width>121</width>
-       <height>24</height>
+       <height>31</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -687,6 +687,45 @@
      </layout>
     </widget>
    </widget>
+   <widget class="QLineEdit" name="yaw_file_name">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>90</y>
+      <width>101</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>record_yaw</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_start_record_yaw">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>130</y>
+      <width>91</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>yaw start</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_stop_record_yaw_2">
+    <property name="geometry">
+     <rect>
+      <x>770</x>
+      <y>170</y>
+      <width>91</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>yaw stop</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -694,7 +733,7 @@
      <x>0</x>
      <y>0</y>
      <width>873</width>
-     <height>19</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>

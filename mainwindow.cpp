@@ -6,6 +6,7 @@ struct Robot_PID kinematicControl::first_pid;
 //float robotStatus::k_p;
 //float robotStatus::k_i;
 //float robotStatus::k_d;
+bool MainWindow::write_file_stop;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -43,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    QTimer *camera_timer2=new QTimer(this);
 //    camera_timer2->start(30);
 //    connect(camera_timer2,SIGNAL(timeout()),this,SLOT(videoUpdate2()));
-
+    this->write_file_stop=false;
 
     connect(camera_timer,SIGNAL(timeout()),this,SLOT(videoUpdate()));
     connect(camera_timer1,SIGNAL(timeout()),this,SLOT(video1Update()));
@@ -492,4 +493,35 @@ void MainWindow::on_btn_stop_formation_clicked()
 void MainWindow::on_advanced_angle_textChanged(const QString &arg1)
 {
     ui->reset_parameter->setEnabled(true);
+}
+
+void  MainWindow::write_file_thread(string filename)
+{
+    MainWindow check;
+    while(1)
+    {
+        if(check.write_file_stop)
+            break;
+        write_yaw_file(filename);
+    }
+}
+
+void MainWindow::on_btn_start_record_yaw_clicked()
+{
+    string filename=ui->yaw_file_name->text().toStdString();
+
+    Log logfile;
+    string file_name="/home/pi/Desktop/underwaterSwarm/images/"+filename+".log";;
+    logfile.Open(file_name);
+    logfile.Clear();
+    logfile.Close();
+
+    this->write_file_stop=false;
+    std::thread thread_yaw(this->write_file_thread,filename);
+    thread_yaw.detach();
+}
+
+void MainWindow::on_btn_stop_record_yaw_2_clicked()
+{
+    this->write_file_stop=true;
 }
