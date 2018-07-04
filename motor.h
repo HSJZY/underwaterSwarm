@@ -21,14 +21,14 @@ private:
 
         int min_speed_anticlockwise=1390;
         int max_speed_anticlockwise=1290;
-        int min_speed_clockwise=1430;
-        int max_speed_clockwise=1520;
+        int min_speed_clockwise=1410;
+        int max_speed_clockwise=1500;
 public:
     motor_c();
     void motor_setup();
     void single_motor_setup(int motor_pin);
 
-    //void motor_drive(int speed_1,int speed_2,int speed_3,int speed_4);
+//void motor_drive(int speed_1,int speed_2,int speed_3,int speed_4);
 //    void motor1_c(int speed);
 //    void motor2_c(int speed);
 //    void motor3_c(int speed);

@@ -136,7 +136,7 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
             //左边速度大于右边，转动右后方的电机
             third_motor_pin=motor_pin_right_back;
             if(abs(left_right_diff_speed)>0.06)
-                third_motor_speed=0.4*abs(left_right_diff_speed);
+                third_motor_speed=0.2*abs(left_right_diff_speed);
             else
                 third_motor_speed=0;
 
@@ -157,7 +157,7 @@ struct Robot_PID kinematicControl::MoveForward(float target_angle, float ratio_s
             third_motor_pin=motor_pin_left_back;
             if(abs(left_right_diff_speed)>0.06)
             {
-                third_motor_speed=0.4*abs(left_right_diff_speed);
+                third_motor_speed=0.2*abs(left_right_diff_speed);
             }
             else
             {
@@ -201,7 +201,7 @@ void kinematicControl::SelfRotate(float target_angle)
     {
         int motor_pin_1,motor_pin_2;
         float cur_angle=curRobotStatue.getCurAngleOfMPU();
-        float cur_ratio_speed=ratio_speed*(0.4+abs(cur_angle-target_angle)/30);
+        float cur_ratio_speed=ratio_speed*(0.2+abs(cur_angle-target_angle)/30);
         cur_ratio_speed=std::min(cur_ratio_speed,ratio_speed);
         if(cur_angle<target_angle)
         {

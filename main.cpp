@@ -160,6 +160,8 @@ void init_robot_status()
 int main(int argc, char *argv[])
 {
     wiringPiSetup();
+    initMPU6050();
+    delay(10);
     init_robot_status();
 
 //    test_potential_field_two_points();
@@ -169,7 +171,7 @@ int main(int argc, char *argv[])
 //    test_udp();
 //    test_parse_str();
 
-    initMPU6050();
+
 //    test_line_formation();
 //    test_formation_alg();
 

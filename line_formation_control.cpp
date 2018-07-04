@@ -17,6 +17,7 @@ void line_formation_control::start_line_formation()
     kinematicControl kine_control;
     struct Robot_PID first_pid=kine_control.get_first_pid();
     int last_drive_side=5;
+    kine_control.switchMode();
     while(1)
     {
         if (cur_robot_statue.get_formation_is_stop_state()==true)break;
@@ -396,7 +397,12 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
     float target_angle=target_dist_ang[1]*180/PI;//convert to degree
     robotStatus cur_robot_status;
 
-    if(target_distance<=50)
+    if(cur_robot_status.getCurAngleOfMPU()>90 || cur_robot_status.getCurAngleOfMPU()<-90)
+    {
+        kine_control.SelfRotate(0);
+    }
+
+    if(target_distance<=60)
     {
         if(last_drive_side!=5)
             kine_control.back_rotate_two_motor(last_drive_side,0.2,1000);
@@ -422,12 +428,17 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
     }
 
     float move_ratio_speed=std::min(target_distance,float(1000))/1000*0.35;
-    float move_angle;
+    float move_angle=0;
 
     if(last_drive_side!=move_side)
     {
+//        struct Robot_PID first_pid=kine_control.get_first_pid();
+        successed_pid=kine_control.get_first_pid();
 //        motor_c motor;
-        kine_control.switchMode();
+
+//        kine_control.switchMode();
+
+
 //        switch (move_side) {
 //        case left_side:
 //            if(cur_robot_status.get_if_motor_is_sleep(motor3_pin))
@@ -460,11 +471,11 @@ void line_formation_control::start_moving(vector<float> target_dist_ang,struct R
 
     switch (move_side) {
     case left_side:
-        move_angle=target_angle-90;
+//        move_angle=target_angle-90;
         successed_pid=kine_control.MoveLateral(move_angle,left_side,move_ratio_speed,500,successed_pid);
         break;
     case right_side:
-        move_angle=target_angle+90;
+//        move_angle=target_angle+90;
         successed_pid=kine_control.MoveLateral(move_angle,right_side,move_ratio_speed,500,successed_pid);
         break;
     case forward_side:
